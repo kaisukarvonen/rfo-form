@@ -15,15 +15,17 @@ class PrivatePersonForm extends React.Component {
   }
 
   render() {
-    return [
-      <Header as="h4" dividing>Mikä on vierailusi tyyppi?</Header>,
-      <Form.Radio label="Synttärit" />,
-      <Form.Radio label="Polttarit" />,
-      <Form.Group inline>
-        <Form.Radio label="Muu, mikä?" />
-        <Form.Input width={8} />
-      </Form.Group>,
-    ];
+    return (
+      <div>
+        <Header as="h4" dividing>Mikä on vierailusi tyyppi?</Header>
+        <Form.Radio label="Synttärit" />
+        <Form.Radio label="Polttarit" />
+        <Form.Group inline>
+          <Form.Radio label="Muu, mikä?" />
+          <Form.Input width={8} />
+        </Form.Group>
+      </div>
+    );
   }
 }
 export default PrivatePersonForm;

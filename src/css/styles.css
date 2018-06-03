@@ -2,7 +2,7 @@
 
 .ui.selection.dropdown {
   min-height: 28px !important;
-  padding: 0.7em 0.5em 0.5em 0.5em !important;
+  padding: 0.5em !important;
 }
 
 .ui.selection.dropdown .menu>.item {
@@ -10,11 +10,28 @@
 }
 
 .ui.selection.dropdown>.delete.icon, .ui.selection.dropdown>.dropdown.icon, .ui.selection.dropdown>.search.icon {
-  padding: 0.7em 0.5em 0.5em 0.5em !important;
+  padding: 0.5em !important;
 }
 
 .ui.search.selection.dropdown>input.search {
-  padding: 0.7em 0.5em 0.5em 0.5em !important;
+  min-height: 28px !important;
+  padding: 0.5em !important;
+}
+
+.ui.header {
+  margin: 0.5em 0;
+}
+
+.ui.form .field {
+  margin: 0.5em 0;
+}
+
+p {
+  margin: 0.5em 0;
+}
+
+p:first-child {
+  margin: 0.5em 0;
 }
 
 
