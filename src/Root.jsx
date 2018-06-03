@@ -4,23 +4,24 @@ import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import App from './components/App';
-import fields, { fieldSagas } from './dux/fields';
+import fields from './dux/fields';
+import rootSaga from './dux/rootSaga';
 
 
-// const sagaMiddleware = createSagaMiddleware();
-// const store = createStore(
-//   fields,
-//   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
-//   applyMiddleware(sagaMiddleware),
-// );
+const sagaMiddleware = createSagaMiddleware();
+const store = createStore(
+  fields,
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
+  applyMiddleware(sagaMiddleware),
+);
 
-// sagaMiddleware.run(fieldSagas);
+sagaMiddleware.run(rootSaga);
 
 const Root = () => (
   <div>
-    {/* <Provider store={store}> */}
+    <Provider store={store}>
       <App />
-    {/* </Provider> */}
+    </Provider>
   </div>
 );
 export default Root;

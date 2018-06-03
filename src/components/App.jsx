@@ -1,6 +1,12 @@
 import React from 'react';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import * as fieldActions from '../dux/fields';
 import { Container, Header, Form, Popup, Icon } from 'semantic-ui-react';
+import _ from 'lodash';
 import DayPicker from 'react-day-picker';
+import MomentLocaleUtils from 'react-day-picker/moment';
+import 'moment/locale/fi';
 import moment from 'moment';
 import '../css/styles.css';
 import '../css/DayPicker.css';
@@ -14,10 +20,13 @@ class App extends React.Component {
     popupOpen: false,
     from: undefined,
     to: undefined,
+    lunch: false,
   };
 
   componentWillMount = () => {
-    // fetch fields
+    const url = window.location;
+    let searchParams = new URLSearchParams(url.search);
+    this.props.fetchFields(searchParams.get('language'));
   }
 
   getTimeOptions = () => {
@@ -66,8 +75,15 @@ class App extends React.Component {
     }
   }
 
+  getValue = (key) => this.props.fields && _.find(this.props.fields, { key }).value;
 
   render() {
+    const styles = {
+      categoryHeader: {
+        cursor: 'pointer',
+        width: '180px',
+      }
+    };
     const { from, to } = this.state;
     const modifiers = { start: from, end: to };
     let dateValue = '';
@@ -82,7 +98,7 @@ class App extends React.Component {
         <Form style={{ maxWidth: '900px' }}>
           <Header as="h4" dividing>Yhteystiedot</Header>
           <Form.Group widths="equal">
-            <Form.Input label="Nimi *" />
+            <Form.Input label={this.getValue('name')} />
             <Form.Input label="Sähköposti *" />
             <Form.Input label="Puhelin" />
           </Form.Group>
@@ -99,7 +115,7 @@ class App extends React.Component {
                   width={8}
                   placeholder="Aikaväli"
                   label="Ajankohta *"
-                  icon="calendar outline"
+                  icon="calendar alternate outline"
                   name="date"
                   onChange={this.handleOnChange}
                   value={dateValue}
@@ -107,7 +123,8 @@ class App extends React.Component {
                  }
               content={
                 <DayPicker
-                  locale="fi"
+                  localeUtils={MomentLocaleUtils}
+                  locale={'fi'}
                   numberOfMonths={2}
                   className="Selectable"
                   onDayClick={this.handleDayClick}
@@ -118,13 +135,13 @@ class App extends React.Component {
                  }
             />
             <Form.Select
-              label="Tuloaika"
+              label={from ? `Tuloaika ${moment(from).format('DD.MM.YYYY')}` : 'Tuloaika'}
               width={4}
               placeholder="Kellonaika"
               options={timeOptions}
             />
             <Form.Select
-              label="Lähtöaika"
+              label={to ? `Lähtöaika ${moment(to).format('DD.MM.YYYY')}` : 'Lähtöaika'}
               width={4}
               placeholder="Kellonaika"
               options={timeOptions}
@@ -136,8 +153,8 @@ class App extends React.Component {
             <Form.Radio style={{ paddingRight: '26px', fontSize: '16px' }} label="Yritysasiakas" value="company" checked={this.state.type === 'company'} onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')} />
             <Form.Radio style={{ fontSize: '16px' }} label="Yksityisasiakas" value="private" checked={this.state.type === 'private'} onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')} />
           </Form.Group>
-          { this.state.type === 'company' && <CompanyForm /> }
-          { this.state.type === 'private' && <PrivatePersonForm /> }
+          { this.state.type === 'company' && <CompanyForm getValue={this.getValue} handleOnChange={this.handleOnChange} /> }
+          { this.state.type === 'private' && <PrivatePersonForm getValue={this.getValue} /> }
           <Header as="h4" dividing>Mitä lisäpalveluja tarvitset?</Header>
           <Form.Checkbox label="Pyyhkeet" />
           <Form.Checkbox label="Lakanat" />
@@ -145,10 +162,11 @@ class App extends React.Component {
           <Header as="h5">Tarjoilut</Header>
           <Form.Checkbox label="Aamiaiskahvit" />
           <Form.Checkbox label="Aamiainen" />
-          <Form.Group inline style={{ cursor: 'pointer', width: '300px' }} onClick={() => { this.setState({ showLunch: !this.state.showLunch })}}>
-            <Form.Checkbox label="Lounas" id="lunch" checked={this.state.lunch} onChange={this.handleOnChange} /> <Icon name="angle down" /> (kolme vaihtoehtoa)
+          <Form.Group inline>
+            <Form.Checkbox label="Lounas" id="lunch" checked={this.state.lunch} onChange={this.handleOnChange} />
+            <p style={styles.categoryHeader} onClick={() => { this.setState({ lunch: !this.state.lunch })}}><Icon name="angle down" /> (kolme vaihtoehtoa)</p>
           </Form.Group>
-          {(this.state.showLunch || this.state.lunch) &&
+          {this.state.lunch &&
             <div style={{ padding: '0 0 12px 12px' }}>
               <Form.Radio label="Maahisten hirvimakkaroita ja talon omaa peruna-yrttisalaattia" />
               <Form.Radio label="Ilmattaren kermaista kasvis-, kala- tai riistakeittoa" />
@@ -156,16 +174,25 @@ class App extends React.Component {
             </div>}
           <Form.Checkbox label="Nokipannukahvit" />
           <Form.Checkbox label="Leivonnainen" />
-          <Form.Group inline style={{ cursor: 'pointer', width: '300px' }} onClick={() => { this.setState({ showDinner: !this.state.showDinner })}}>
-            <Form.Checkbox label="Illallinen" id="dinner" checked={this.state.dinner} onChange={this.handleOnChange} /> <Icon name="angle down" /> (x vaihtoehtoa)
-          </Form.Group>
-          {(this.state.showDinner || this.state.dinner) &&
+          <Form.Group inline>
+
+          <Form.Checkbox label="Illallinen" id="dinner" checked={this.state.dinner} onChange={this.handleOnChange} />
+          <p style={styles.categoryHeader} onClick={() => { this.setState({ dinner: !this.state.dinner })}}><Icon name="angle down" /> (kolme vaihtoehtoa)</p>
+        </Form.Group>
+          {this.state.dinner &&
             <div style={{ padding: '0 0 12px 12px' }}>
               <Form.Radio label="x" />
             </div>}
           <Form.Checkbox label="Iltapala" />
+          <Form.TextArea rows={2} autoHeight label="Mahdolliset ruoka-aineallergiat" width={10} />
           <Header as="h5">Aktiviteetit</Header>
-          <Form.Checkbox label="Vesiurheilu (melonta, sup-lautailu)" />
+          <p style={styles.categoryHeader} onClick={() => { this.setState({ showRental: !this.state.showRental })}}>Vuokravälineet <Icon name="angle down" /></p>
+        {this.state.showRental &&
+          <div style={{ padding: '0 0 12px 12px' }}>
+            <Form.Checkbox label="Sup-laudat" />
+            <Form.Checkbox label="Kanootit" />
+            <Form.Checkbox label="Potkukelkat" />
+          </div>}
           <Form.Checkbox label="Kalliolaskeutuminen" />
           <Form.Checkbox label="Tiimikisailu" />
           <Form.Checkbox label="Kehon hoito (esim. jooga, kahvakuula, yrttikylpy)" />
@@ -173,16 +200,20 @@ class App extends React.Component {
           <Form.Checkbox label="Jurttasauna" />
           <Form.Checkbox label="Elävää musiikkia" />
           <Form.Checkbox label="Husky-retki kickbikella" />
+
+          <Header as="h4" dividing>Alustava hinta</Header>
+          <p>Hinta sis.*TODO* . Tarjoilujen ja aktiviteettien hinta määräytyy saatavuuden mukaan</p>
         </Form>
       </Container>
     );
   }
 }
 
-// export default connect(
-//   state => ({
-//   }),
-//   dispatch => (bindActionCreators({
-//   }, dispatch)),
-// )(Form);
-export default App;
+export default connect(
+  state => ({
+    fields: state.fields,
+  }),
+  dispatch => (bindActionCreators({
+    ...fieldActions,
+  }, dispatch)),
+)(App);

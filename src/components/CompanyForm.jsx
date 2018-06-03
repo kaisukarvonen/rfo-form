@@ -12,8 +12,15 @@ class CompanyForm extends React.Component {
   }
 
   render() {
+    console.log(this.props);
     return [
-      'plaa',
+      <Header as="h4" dividing>Mikä on vierailusi tyyppi?</Header>,
+      <Form.Radio label={this.props.getValue('meeting')} />,
+      <Form.Radio label={this.props.getValue('recreational')} />,
+      <Form.Group inline>
+        <Form.Radio label={this.props.getValue('somethingElse')} />
+        <Form.Input width={8} />
+      </Form.Group>,
     ];
   }
 }
