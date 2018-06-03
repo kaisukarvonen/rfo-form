@@ -31,7 +31,7 @@
     "react-scripts": "^1.0.14",
     "redux": "^3.7.2",
     "redux-saga": "^0.16.0",
-    "semantic-ui-css": "^2.2.12",
+    "semantic-ui-css": "^2.3.1",
     "semantic-ui-react": "^0.79.1"
   },
   "devDependencies": {
