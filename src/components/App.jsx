@@ -79,6 +79,7 @@ class App extends React.Component {
 
 
   render() {
+    console.log(this.state.visitType);
     const styles = {
       categoryHeader: {
         cursor: 'pointer',
@@ -115,7 +116,7 @@ class App extends React.Component {
                 onOpen={this.toggleDatePicker}
                 trigger={
                   <Form.Input
-                    width={8}
+                    width={7}
                     placeholder="Aikaväli"
                     label="Ajankohta *"
                     icon="calendar alternate outline"
@@ -139,17 +140,23 @@ class App extends React.Component {
               />
               <Form.Select
                 label={from ? `Tuloaika ${moment(from).format('DD.MM.YYYY')}` : 'Tuloaika'}
-                width={4}
+                width={3}
                 compact
                 placeholder="Kellonaika"
                 options={timeOptions}
               />
               <Form.Select
-                label={to ? `Lähtöaika ${moment(to).format('DD.MM.YYYY')}` : 'Lähtöaika'}
-                width={4}
+                label={to ? `Lähtöaika ${moment(to).format('DD.MM.YYYY')}` : `Lähtöaika ${dateValue}`}
+                width={3}
                 compact
                 placeholder="Kellonaika"
                 options={timeOptions}
+              />
+              <Form.Input
+                type="number"
+                label="Henkilömäärä"
+                width={3}
+                min="1"
               />
 
             </Form.Group>
@@ -172,21 +179,28 @@ class App extends React.Component {
               handleOnRadioChange={this.handleOnRadioChange}
               values={this.state}
             /> }
-            <Header as="h4" dividing>Mitä lisäpalveluja tarvitset?</Header>
+            <Header as="h4" dividing style={{ paddingTop: '0.5em' }}>Mitä lisäpalveluja tarvitset?</Header>
             <Grid style={{ marginBottom: '1px' }}>
               <Grid.Column width={5}>
-                <Form.Checkbox label={this.getObject('linen').value} id="linen" handleOnChange={this.handleOnChange} />
-                <Form.Checkbox label={this.getObject('towels').value} id="towels" handleOnChange={this.handleOnChange} />
-                <Form.Checkbox label={this.getObject('hottub').value} id="hottub" handleOnChange={this.handleOnChange} />
+                <Form.Checkbox label={this.getObject('linen').value} id="linen" onChange={this.handleOnChange} />
+                <Form.Checkbox label={this.getObject('towels').value} id="towels" onChange={this.handleOnChange} />
+                <Form.Checkbox label={this.getObject('hottub').value} id="hottub" onChange={this.handleOnChange} />
+                <Form.Checkbox label={this.getObject('sauna').value} id="sauna" onChange={this.handleOnChange} />
               </Grid.Column>
               <Grid.Column width={3}>
                 <p>{this.getObject('linen').price} € + alv</p>
                 <p>{this.getObject('towels').price} € + alv</p>
                 <p>{this.getObject('hottub').price} € + alv</p>
+                <p>{this.getObject('sauna').price} € + alv</p>
               </Grid.Column>
             </Grid>
-            <p style={styles.categoryHeader} onClick={() => { this.setState({ showRental: !this.state.showRental }); }}>Kokousvälineet <Icon name="angle down" /></p>
-            {this.state.showRental &&
+            { this.state.type === 'company' && this.state.visitType === 'meeting' &&
+              <p style={styles.categoryHeader} onClick={() => { this.setState({ showMeetingEquipment: !this.state.showMeetingEquipment }); }}>
+              Kokousvälineet
+                <Icon name="angle down" />
+              </p>
+            }
+            { this.state.showMeetingEquipment &&
             <div style={{ padding: '0 0 12px 12px' }}>
               <Form.Checkbox label="Kaapelit (HDMI, VGA)" />
               <Form.Checkbox label="Fläppitaulu" />

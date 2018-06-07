@@ -9,18 +9,15 @@ class CompanyForm extends React.Component {
   render() {
     const { values } = this.props;
     return (
-      <div>
+      <React.Fragment>
         <Header as="h4" dividing>Mikä on vierailusi tyyppi?</Header>
         <Form.Radio label={this.props.getObject('meeting').value} value="meeting" checked={values.visitType === 'meeting'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
         <Form.Radio label={this.props.getObject('recreational').value} value="recreational" checked={values.visitType === 'recreational'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
-        <Form.Group inline>
-          <Form.Radio label={this.props.getObject('somethingElse').value} value="somethingElse" checked={values.visitType === 'somethingElse'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
-          <Form.Input width={8} />
-        </Form.Group>
+        <Form.Input width={8} label="Muu, mikä?" id="visitType" onChange={this.props.handleOnChange} />
         { values.visitType === 'meeting' &&
-        <div>
+        <React.Fragment>
           <Header as="h4" dividing>Millaisen kokouksen haluat pitää?</Header>
-          <Grid style={{ marginBottom: '1px' }}>
+          <Grid>
             <Grid.Column width={10}>
               <Form.Field inline>
                 <Checkbox radio label={this.props.getObject('dayMeeting').value} value="dayMeeting" checked={values.meetingType === 'dayMeeting'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'meetingType')} />
@@ -52,8 +49,35 @@ class CompanyForm extends React.Component {
               <p>{this.props.getObject('meetingAccommodation').price} € + alv</p>
             </Grid.Column>
           </Grid>
-        </div>}
-      </div>
+        </React.Fragment>}
+        { values.visitType === 'recreational' &&
+        <React.Fragment>
+          <Header as="h4" dividing>Millaisen virkistyspäivän haluat pitää?</Header>
+          <Form.Field inline>
+            <Checkbox radio label={this.props.getObject('luonnonLumoa').value} value="luonnonLumoa" checked={values.recreationalType === 'luonnonLumoa'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'recreationalType')} />
+            <Icon link name="info circle" content={this.props.getObject('luonnonLumoa').url} />
+          </Form.Field>
+          <Form.Field inline>
+            <Checkbox radio label={this.props.getObject('liikkumisenIloa').value} value="liikkumisenIloa" checked={values.recreationalType === 'liikkumisenIloa'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'recreationalType')} />
+            <Icon link name="info circle" content={this.props.getObject('liikkumisenIloa').url} />
+
+          </Form.Field>
+        </React.Fragment>}
+
+        { values.visitType &&
+          <React.Fragment>
+            <Header as="h4" dividing>Mitä tiloja haluat käyttää?</Header>
+            <Form.Radio label={this.props.getObject('villaParatiisi').value} value="villaParatiisi" checked={values.locationType === 'villaParatiisi'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} />
+            <Form.Radio label={this.props.getObject('salmenTupa').value} value="salmenTupa" checked={values.locationType === 'salmenTupa'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} />
+            { values.visitType !== 'meeting' &&
+            <React.Fragment>
+              <Form.Radio label={this.props.getObject('nuuksionTupa').value} value="nuuksionTupa" checked={values.locationType === 'nuuksionTupa'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} />
+              <Form.Radio label={this.props.getObject('luontoIlmanTiloja').value} value="luontoIlmanTiloja" checked={values.locationType === 'luontoIlmanTiloja'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} />
+            </React.Fragment>
+            }
+          </React.Fragment>
+        }
+      </React.Fragment>
     );
   }
 }

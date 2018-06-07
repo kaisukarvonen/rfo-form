@@ -19,7 +19,7 @@
 }
 
 .ui.header {
-  margin: 0.5em 0;
+  margin: 0.8em 0 0.4em 0;
 }
 
 .ui.form .field {
@@ -42,6 +42,7 @@ p:first-child {
 
 .ui.input input {
   height: 30px !important;
+  padding: 0.5em !important;
 }
 
 .ui.table.activity-list td {

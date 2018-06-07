@@ -15,15 +15,13 @@ class PrivatePersonForm extends React.Component {
   }
 
   render() {
+    const { values } = this.props;
     return (
       <div>
         <Header as="h4" dividing>Mikä on vierailusi tyyppi?</Header>
-        <Form.Radio label="Synttärit" />
-        <Form.Radio label="Polttarit" />
-        <Form.Group inline>
-          <Form.Radio label="Muu, mikä?" />
-          <Form.Input width={8} />
-        </Form.Group>
+        <Form.Radio label="Synttärit" value="birthday" checked={values.visitType === 'birthday'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
+        <Form.Radio label="Polttarit" value="bachelor" checked={values.visitType === 'bachelor'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
+        <Form.Input width={8} label="Muu, mikä?" id="visitType" onChange={this.props.handleOnChange} />
       </div>
     );
   }
