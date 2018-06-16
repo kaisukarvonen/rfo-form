@@ -7,7 +7,6 @@ import App from './components/App';
 import fields from './dux/fields';
 import rootSaga from './dux/rootSaga';
 
-
 const sagaMiddleware = createSagaMiddleware();
 const store = createStore(
   fields,
@@ -20,7 +19,7 @@ sagaMiddleware.run(rootSaga);
 const Root = () => (
   <div>
     <Provider store={store}>
-      <App />
+        <App />
     </Provider>
   </div>
 );

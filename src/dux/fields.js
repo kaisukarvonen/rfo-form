@@ -1,14 +1,14 @@
 import { takeLatest, call, put } from 'redux-saga/effects';
-import { enFields, finFields } from './fieldData';
+import fetch from './api/fields';
 
 const FETCH_FIELDS = 'FETCH_FIELDS';
 const FETCHED_FIELDS = 'FETCHED_FIELDS';
 
-export const fetchFields = language => ({ type: FETCH_FIELDS, language });
+export const fetchFields = () => ({ type: FETCH_FIELDS });
 export const fetchedFields = fieldValues => ({ type: FETCHED_FIELDS, fields: fieldValues });
 
 
-const defaultState = {};
+const defaultState = { fields: [] };
 
 export default function (state = defaultState, action) {
   switch (action.type) {
@@ -20,11 +20,16 @@ export default function (state = defaultState, action) {
 }
 
 
-function* fetchFieldsWorker(action) {
-  if (action.language === 'fi') {
-    yield put(fetchedFields(finFields));
-  } else {
-    yield put(fetchedFields(enFields));
+function* fetchFieldsWorker() {
+  try {
+    const response = yield call(fetch);
+    if (response.status === 200) {
+      yield put(fetchedFields(response.data));
+    } else {
+    // yield put(fetchMessage({ value: 'Fetching activities failed', error: true }));
+    }
+  } catch (e) {
+  // yield put(fetchMessage({ value: 'Fetching activities failed', error: true }));
   }
 }
 

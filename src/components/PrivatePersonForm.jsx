@@ -1,6 +1,6 @@
 import React from 'react';
 import { Header, Form } from 'semantic-ui-react';
-
+import lan from '../utils';
 
 class PrivatePersonForm extends React.Component {
   state = { popupOpen: false };
@@ -18,10 +18,10 @@ class PrivatePersonForm extends React.Component {
     const { values } = this.props;
     return (
       <div>
-        <Header as="h4" dividing>Mikä on vierailusi tyyppi?</Header>
-        <Form.Radio label="Synttärit" value="birthday" checked={values.visitType === 'birthday'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
-        <Form.Radio label="Polttarit" value="bachelor" checked={values.visitType === 'bachelor'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
-        <Form.Input width={8} label="Muu, mikä?" id="visitType" onChange={this.props.handleOnChange} />
+        <Header as="h4" dividing>{this.props.getObject('visitTypeTitle')[lan]}</Header>
+        <Form.Radio label={this.props.getObject('birthday')[lan]} value="birthday" checked={values.visitType === 'birthday'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
+        <Form.Radio label={this.props.getObject('bachelor')[lan]} value="bachelor" checked={values.visitType === 'bachelor'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
+        <Form.Input width={8} label={this.props.getObject('visitTypeString')[lan]} id="visitTypeString" value={values.visitTypeString} onChange={this.props.handleOnChange} />
       </div>
     );
   }
