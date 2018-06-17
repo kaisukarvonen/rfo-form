@@ -16,6 +16,7 @@ class Form extends React.Component {
     from: undefined,
     to: undefined,
     lunch: false,
+    personAmount: 1,
   };
 
   getTimeOptions = () => {
@@ -27,7 +28,9 @@ class Form extends React.Component {
     return options;
   }
 
-  getObject = key => (this.props.fields ? _.find(this.props.fields, { key }) : {});
+  getObject = key => _.find(this.props.fields, { key });
+  getObjectInList = (key, innerKey) => _.find(this.getObject(key).options, { key: innerKey });
+
 
   handleOnChange = (e, data) => {
     this.setState({
@@ -84,7 +87,22 @@ class Form extends React.Component {
     return lan === 'fi' ? `${number} vaihtoehtoa` : `${number} options`;
   }
 
-  calculatePrice = () => 'XXXX'
+  calculatePrice = () => {
+    let price = 0;
+    if (this.state.meetingType) {
+      price += this.getObjectInList('meetingOptions', this.state.meetingType).price;
+    }
+    if (this.state.linen) {
+      price += this.getObject('linen').price * this.state.personAmount;
+    }
+    if (this.state.towels) {
+      price += this.getObject('towels').price * this.state.personAmount;
+    }
+    if (this.state.hottub) {
+      price += this.getObject('hottub').price;
+    }
+    return price;
+  }
 
 
   render() {
@@ -108,13 +126,13 @@ class Form extends React.Component {
     }
     const timeOptions = this.getTimeOptions();
     return (
-      <Container style={{ paddingTop: '20px' }}>
+      <Container style={{ padding: '20px 0 20px 0' }}>
         <SemanticForm style={{ maxWidth: '900px' }}>
-          <Header as="h4" dividing>Yhteystiedot</Header>
+          <Header as="h4" dividing>{this.getObject('contactDetails')[lan]}</Header>
           <SemanticForm.Group widths="equal">
-            <SemanticForm.Input label={this.getObject('name')[lan]} id="name" onChange={this.handleOnChange} />
-            <SemanticForm.Input label={this.getObject('email')[lan]} id="email" onChange={this.handleOnChange} />
-            <SemanticForm.Input label={this.getObject('phone')[lan]} id="phone" onChange={this.handleOnChange} />
+            <SemanticForm.Input required label={this.getObject('name')[lan]} id="name" onChange={this.handleOnChange} />
+            <SemanticForm.Input required label={this.getObject('email')[lan]} id="email" onChange={this.handleOnChange} />
+            <SemanticForm.Input required label={this.getObject('phone')[lan]} id="phone" onChange={this.handleOnChange} />
           </SemanticForm.Group>
           <SemanticForm.Group>
             <Popup
@@ -126,6 +144,7 @@ class Form extends React.Component {
               onOpen={this.toggleDatePicker}
               trigger={
                 <SemanticForm.Input
+                  required
                   width={7}
                   label={this.getObject('dates')[lan]}
                   icon="calendar alternate outline"
@@ -135,7 +154,8 @@ class Form extends React.Component {
                 />
                  }
               content={
-                <DayPicker
+                <React.Fragment>
+                  <DayPicker
                   localeUtils={MomentLocaleUtils}
                   locale={lan}
                   numberOfMonths={2}
@@ -145,33 +165,39 @@ class Form extends React.Component {
                   selectedDays={[from, { from, to }]}
                   disabledDays={{ before: new Date() }}
                 />
+                <p>dfdf</p>
+              </React.Fragment>
                  }
             />
             <SemanticForm.Select
               label={from ? `${this.getObject('arrivalTime')[lan]} ${moment(from).format('DD.MM.YYYY')}` : this.getObject('arrivalTime')[lan]}
               width={3}
               compact
+              required
               placeholder="hh:mm"
               options={timeOptions}
               id="arrivalTime"
-              handleOnChange={this.handleOnChange}
+              onChange={this.handleOnChange}
             />
             <SemanticForm.Select
               label={to ? `${this.getObject('departTime')[lan]} ${moment(to).format('DD.MM.YYYY')}` : `${this.getObject('departTime')[lan]} ${dateValue}`}
               width={3}
               compact
+              required
               placeholder="hh:mm"
               options={timeOptions}
               id="departTime"
-              handleOnChange={this.handleOnChange}
+              onChange={this.handleOnChange}
             />
             <SemanticForm.Input
               type="number"
               label={this.getObject('personAmount')[lan]}
               width={3}
               min="1"
+              required
               id="personAmount"
-              handleOnChange={this.handleOnChange}
+              value={this.state.personAmount}
+              onChange={this.handleOnChange}
             />
 
           </SemanticForm.Group>
@@ -257,13 +283,17 @@ class Form extends React.Component {
             <SemanticForm.Checkbox label={i[lan]} id={i.key} onChange={this.handleOnChange} />)
           }
           <Header as="h4" dividing>{this.getObject('priceTitle')[lan]}</Header>
-          <p>{lan === 'fi' ?
-            `Hinta sisältäen tilavarauksen, siivouksen${this.state.linen ? ', liinavaatteet' : ''}${this.state.hottub ? ', paljun' : ''}:
-            ${this.calculatePrice()} €` :
-            `Price including accommodation, cleaning${this.state.linen ? ', linen' : ''}${this.state.hottub ? ', hot tub' : ''}:
-            ${this.calculatePrice()} €`
+          {lan === 'fi' ?
+            <p>
+              {`Hinta sisältäen tilavarauksen, siivouksen${this.state.linen ? ', liinavaatteet' : ''}${this.state.towels ? ', pyyhkeet' : ''}${this.state.hottub ? ', paljun' : ''}:
+              ${this.calculatePrice()} €`}<br />Tarjoilujen ja lisäpalveluiden hinnat määräytyvät saatavuuden mukaan
+            </p>
+          :
+            <p>
+              {`Price including accommodation, cleaning${this.state.linen ? ', linen' : ''}${this.state.linen ? ', towels' : ''}${this.state.hottub ? ', hot tub' : ''}:
+            ${this.calculatePrice()} €`}<br />Food and other extra service prices depend on availability
+            </p>
           }
-          </p>
         </SemanticForm>
       </Container>
     );
