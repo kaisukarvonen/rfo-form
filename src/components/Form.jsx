@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Header, Form as SemanticForm, Popup, Icon, Grid } from 'semantic-ui-react';
+import { Container, Header, Form as SemanticForm, Popup, Icon, Grid, Label, Message } from 'semantic-ui-react';
 import _ from 'lodash';
 import DayPicker from 'react-day-picker';
 import MomentLocaleUtils from 'react-day-picker/moment';
@@ -17,7 +17,24 @@ class Form extends React.Component {
     to: undefined,
     lunch: false,
     personAmount: 1,
+    error: undefined,
   };
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.locationType && (prevState.personAmount !== this.state.personAmount || prevState.locationType !== this.state.locationType)) {
+      const object = this.getObject(this.state.locationType);
+      let error;
+      if (object.min || object.max) {
+        const min = object.min || 0;
+        const { max } = object;
+        if (this.state.personAmount < min || this.state.personAmount > max) {
+          error = lan === 'fi' ? `Antamasi henkilömäärä ei täsmää valitsemasi tilan '${object[lan]}' kanssa` :
+          `You cannot visit ${object[lan]} with ${this.state.personAmount} persons, please select another location`;
+        }
+      }
+      this.setState({ error: error || undefined });
+    }
+  }
 
   getTimeOptions = () => {
     const times = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
@@ -40,6 +57,7 @@ class Form extends React.Component {
       dinnerType: data.id === 'dinner' ? undefined : this.state.dinnerType,
     });
   }
+
 
   handleOnRadioChange = (e, data, id) => {
     let newState = {};
@@ -156,17 +174,20 @@ class Form extends React.Component {
               content={
                 <React.Fragment>
                   <DayPicker
-                  localeUtils={MomentLocaleUtils}
-                  locale={lan}
-                  numberOfMonths={2}
-                  className="Selectable"
-                  onDayClick={this.handleDayClick}
-                  modifiers={modifiers}
-                  selectedDays={[from, { from, to }]}
-                  disabledDays={{ before: new Date() }}
-                />
-                <p>dfdf</p>
-              </React.Fragment>
+                    localeUtils={MomentLocaleUtils}
+                    locale={lan}
+                    numberOfMonths={2}
+                    fromMonth={new Date()}
+                    className="Selectable"
+                    onDayClick={this.handleDayClick}
+                    modifiers={modifiers}
+                    selectedDays={[from, { from, to }]}
+                    disabledDays={[{ before: new Date() }, new Date(2018, 6, 28)]}
+                  />
+                  <p><Label style={{ backgroundColor: '#c2e2b3', margin: '0 12px 0 20px' }} size="large" circular empty />
+                    {lan === 'fi' ? 'Varattavissa oleva päivä' : 'Available for booking'}
+                  </p>
+                </React.Fragment>
                  }
             />
             <SemanticForm.Select
@@ -201,6 +222,11 @@ class Form extends React.Component {
             />
 
           </SemanticForm.Group>
+          { this.state.error &&
+            <Message negative>
+              {this.state.error}
+            </Message>
+          }
           <Header as="h4">{this.getObject('clientTypeTitle')[lan]}</Header>
           <SemanticForm.Group inline>
             <SemanticForm.Radio style={{ paddingRight: '26px', fontSize: '16px' }} label={this.getObject('company')[lan]} value="company" checked={this.state.type === 'company'} onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')} />
