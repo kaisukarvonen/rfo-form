@@ -19,7 +19,7 @@ sagaMiddleware.run(rootSaga);
 const Root = () => (
   <div>
     <Provider store={store}>
-        <App />
+      <App />
     </Provider>
   </div>
 );

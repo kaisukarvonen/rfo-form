@@ -1,13 +1,13 @@
 import { takeLatest, call } from 'redux-saga/effects';
-import fetch from './api/fields';
+import send from './api/mail';
 
 const SEND_MAIL = 'SEND_MAIL';
 
-export const sendMail = () => ({ type: SEND_MAIL });
+export const sendMail = (email, html) => ({ type: SEND_MAIL, email, html });
 
-function* sendMailWorker() {
+function* sendMailWorker(action) {
   try {
-    const response = yield call(fetch);
+    const response = yield call(send, action);
     if (response.status === 200) {
       // successfull!
     } else {

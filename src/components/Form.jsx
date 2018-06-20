@@ -126,21 +126,22 @@ class Form extends React.Component {
 
 
   isValid = () => {
-    // const date = this.state.to || this.state.from;
-    // const mandatoryFields = [this.state.name, this.state.email, this.state.phone, date, this.state.arrivalTime,
-    //   this.state.departTime, this.state.personAmount];
-    // if (!mandatoryFields.includes('') && !mandatoryFields.includes(undefined)) {
-    //   this.setState({ errors: { ...this.state.errors, mandatoryFields: undefined }});
-    //   return true;
-    // }
-    // return false;
-    return true;
+    const date = this.state.to || this.state.from;
+    const mandatoryFields = [this.state.name, this.state.email, this.state.phone, date, this.state.arrivalTime,
+      this.state.departTime, this.state.personAmount, this.state.type];
+    if (!mandatoryFields.includes('') && !mandatoryFields.includes(undefined)) {
+      this.setState({ errors: { ...this.state.errors, mandatoryFields: undefined }});
+      return true;
+    }
+    return false;
+    // return true;
   }
 
 
   sendMail = () => {
     if (this.isValid() && !this.state.errors.personAmountError) {
       const html = createHTML(this.createDataFields());
+      this.props.sendMail(this.state.email, html);
     } else {
       const e = lan === 'fi' ? 'Täytä pakolliset kentät!' : 'Please fill out all mandatory fields!';
       this.setState({ errors: { ...this.state.errors, mandatoryFields: e }});
@@ -150,16 +151,19 @@ class Form extends React.Component {
   createDataFields = () => {
     const data = this.state;
     const basicInfo = {
+      title: this.getObject('contactDetails').fi,
       [this.getObject('name').fi]: data.name,
       [this.getObject('email').fi]: data.email,
       [this.getObject('phone').fi]: data.phone,
       [this.getObject('dates').fi]: this.dateToStr(data.from, data.to),
       [this.getObject('arrivalTime').fi]: data.arrivalTime,
       [this.getObject('departTime').fi]: data.departTime,
-      [this.getObject('personAmount').fi]: data.personAmount
+      [this.getObject('personAmount').fi]: data.personAmount,
+      Asiakastyyppi: this.getObject(data.type).fi,
+      Hinta: this.calculatePrice(),
     };
     const foods = ['breakfastCoffee', 'breakFast', 'nokipannu', 'dessert', 'supper', 'lunch', 'lunchType', 'dinner', 'dinnerType', 'allergies'];
-    const food = {};
+    const food = { title: 'Tarjoilut' };
     foods.forEach((f) => {
       if (data[f]) {
         if (f === 'lunchType') {
@@ -172,7 +176,7 @@ class Form extends React.Component {
       }
     });
 
-    const activities = {};
+    const activities = { title: 'Aktiviteetit' };
     this.getObject('activityOptions').options.forEach((ac) => {
       if (data[ac.key]) {
         activities[this.getObjectInList('activityOptions', ac.key).fi] = 'Kyllä';
@@ -183,7 +187,32 @@ class Form extends React.Component {
         activities[this.getObjectInList('rentalTitle', rental.key).fi] = 'Kyllä';
       }
     });
-    return { basicInfo, food, activities };
+    const services = ['linen', 'towels', 'hottub'];
+    const extraServices = { title: 'Lisäpalvelut' };
+    services.forEach((s) => {
+      if (data[s]) {
+        extraServices[this.getObject(s).fi] = 'Kyllä';
+      }
+    });
+    const visitDetails = { title: 'Vierailun lisätiedot' };
+    const details = ['companyName', 'visitType', 'visitTypeString', 'meetingType', 'locationType'];
+    details.forEach((d) => {
+      if (data[d]) {
+        if (d === 'meetingType') {
+          const object = this.getObjectInList('meetingOptions', data[d]);
+          visitDetails['Kokouksen tyyppi'] = `${object.fi} - ${object.duration}h`;
+        } else if (d === 'visitType') {
+          visitDetails['Vierailun tyyppi'] = this.getObject(data.visitType).fi;
+        } else if (d === 'visitTypeString') {
+          visitDetails['Vierailun tyyppi'] = data.visitTypeString;
+        } else if (d === 'locationType') {
+          visitDetails.Tilat = this.getObject(data[d]).fi;
+        } else {
+          visitDetails[this.getObject(d).fi] = typeof (data[d]) === 'boolean' ? 'Kyllä' : data[d];
+        }
+      }
+    });
+    return { basicInfo, food, activities, extraServices, visitDetails };
   }
 
 
@@ -291,19 +320,20 @@ class Form extends React.Component {
             />
 
           </SemanticForm.Group>
-          { (this.state.errors.personAmountError || this.state.errors.mandatoryFields) &&
-            <Message negative>
-              <Message.List>
-                {Object.values(this.state.errors).map(e =>
-                  <Message.Item>{e}</Message.Item>)}
-              </Message.List>
-            </Message>
-          }
           <Header as="h4">{this.getObject('clientTypeTitle')[lan]}</Header>
           <SemanticForm.Group inline>
             <SemanticForm.Radio style={{ paddingRight: '26px', fontSize: '16px' }} label={this.getObject('company')[lan]} value="company" checked={this.state.type === 'company'} onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')} />
             <SemanticForm.Radio style={{ fontSize: '16px' }} label={this.getObject('private')[lan]} value="private" checked={this.state.type === 'private'} onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')} />
           </SemanticForm.Group>
+
+          { (this.state.errors.personAmountError || this.state.errors.mandatoryFields) &&
+            <Message negative>
+              <Message.List>
+                {Object.values(this.state.errors).map(e =>
+                  <Message.Item>{e}</Message.Item>)}
+                </Message.List>
+              </Message>
+            }
           { this.state.type === 'company' &&
             <CompanyForm
               getObject={this.getObject}

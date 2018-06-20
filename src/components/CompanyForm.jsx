@@ -54,7 +54,7 @@ class CompanyForm extends React.Component {
         </React.Fragment>
         }
 
-        { values.visitType &&
+        { (values.visitType || values.visitTypeString.length > 0) &&
           <React.Fragment>
             <Header as="h4" dividing>{this.props.getObject('locationTitle')[lan]}</Header>
             <Form.Radio label={this.displayLimits(this.props.getObject('villaParatiisi'))} value="villaParatiisi" checked={values.locationType === 'villaParatiisi'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} />

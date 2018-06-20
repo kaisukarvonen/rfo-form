@@ -2,20 +2,28 @@ import React from 'react';
 import { Email, Item, Span, renderEmail } from 'react-html-email';
 
 function createHTML(data) {
-  console.log(data);
-  // const daterange = this.dateToStr(data.from, data.to);
+  const header = { paddingTop: '15px' };
+
   return renderEmail(
-    <Email title="Hello World!">
-      <Item>
-        <Span fontSize={13}>
-          laaa:{data.name}
-        </Span>
-      </Item>
-        <Item>
-        <Span fontSize={13}>
-          laaa:{data.email}
-        </Span>
-      </Item>
+    <Email title="Tarjouspyyntö" align="left">
+      { Object.keys(data).map(innerObject =>
+        (
+          <div>
+            <Item style={header}><Span fontSize={17}>{data[innerObject].title}</Span></Item>
+            { Object.keys(data[innerObject]).map(key =>
+              (
+                key !== 'title' &&
+                <Item>
+                  <Span fontSize={13} style={{ display: 'inline-block', width: '200px' }}>
+                    {`${key}`}
+                  </Span>
+                  <Span fontSize={13}>
+                    {data[innerObject][key]}
+                  </Span>
+                </Item>
+              ))}
+          </div>)
+      )}
     </Email>);
 }
 
