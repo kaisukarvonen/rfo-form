@@ -5,6 +5,10 @@
   padding: 0.5em !important;
 }
 
+.ui.page.modals.transition.visible {
+    display: flex !important;
+}
+
 .ui.selection.dropdown .menu>.item {
   padding: 0.5em !important;
 }
@@ -29,11 +33,6 @@
 .ui.grid>.row:last-child {
   padding: 0 0 0.5em 0 !important;
 }
-
-/* .ui.grid>.column:not(.row), .ui.grid>.row>.column {
-  padding: 0 !important;
-} */
-
 
 .ui.header {
   margin: 0.8em 0 0.4em 0;

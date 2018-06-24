@@ -1,5 +1,6 @@
-import { takeLatest, call } from 'redux-saga/effects';
+import { takeLatest, call, put } from 'redux-saga/effects';
 import send from './api/mail';
+import { showNotification } from './notification';
 
 const SEND_MAIL = 'SEND_MAIL';
 
@@ -9,12 +10,12 @@ function* sendMailWorker(action) {
   try {
     const response = yield call(send, action);
     if (response.status === 200) {
-      // successfull!
+      yield put(showNotification({ success: true }));
     } else {
-    // yield put(fetchMessage({ value: 'Fetching activities failed', error: true }));
+      yield put(showNotification({ success: false }));
     }
   } catch (e) {
-  // yield put(fetchMessage({ value: 'Fetching activities failed', error: true }));
+    yield put(showNotification({ success: false }));
   }
 }
 

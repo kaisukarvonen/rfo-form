@@ -1,11 +1,12 @@
 import React from 'react';
 import { Email, Item, Span, renderEmail } from 'react-html-email';
 
-function createHTML(data) {
+function createHTML(data, description) {
   const header = { paddingTop: '15px' };
 
   return renderEmail(
     <Email title="Tarjouspyyntö" align="left">
+      {description && <Item>{description}</Item>}
       { Object.keys(data).map(innerObject =>
         (
           <div>

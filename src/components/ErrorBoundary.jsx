@@ -1,4 +1,7 @@
 import React from 'react';
+import { Header, Icon } from 'semantic-ui-react';
+import lan from '../utils';
+
 
 class ErrorBoundary extends React.Component {
   state = { hasError: false };
@@ -10,7 +13,9 @@ class ErrorBoundary extends React.Component {
   render() {
     return (
       this.state.hasError ?
-        <h1>Something went wrong.</h1>
+        <div style={{ padding: '50px' }}>
+          <Header as="h2"><Icon name="exclamation triangle" color="red" />{lan === 'fi' ? 'Sivua ei voida näyttää' : 'Page cannot be displayed'}</Header>
+        </div>
         :
         this.props.children
     );

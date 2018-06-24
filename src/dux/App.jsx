@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 import _ from 'lodash';
 import * as fieldActions from '../dux/fields';
 import * as mailActions from '../dux/mail';
-import * as notificationActions from '../dux/notification';
 import '../css/styles.css';
 import '../css/DayPicker.css';
 import ErrorBoundary from './ErrorBoundary';
@@ -14,7 +13,6 @@ import Form from './Form';
 
 const propTypes = {
   notification: PropTypes.bool,
-  fetchFields: PropTypes.func.isRequired,
 };
 
 const defaultProps = {
@@ -39,10 +37,7 @@ class App extends React.Component {
         />
         }
         { !_.isEmpty(this.props.notification) &&
-        <Notification
-          notification={this.props.notification}
-          hideNotification={this.props.hideNotification}
-        />
+        <Notification notification={this.props.notification} />
       }
       </ErrorBoundary>
     );
@@ -59,6 +54,5 @@ export default connect(
   dispatch => (bindActionCreators({
     ...fieldActions,
     ...mailActions,
-    ...notificationActions,
   }, dispatch)),
 )(App);

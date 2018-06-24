@@ -64,7 +64,7 @@ class Form extends React.Component {
     let newState = {};
     const values = { locationType: undefined, meetingType: undefined, visitTypeString: '' };
     if (id === 'type' && this.state.type !== data.value) {
-      newState = { ...values, visitType: undefined, companyName: '' };
+      newState = { ...values, visitType: undefined, companyName: '', errors: { ...this.state.errors, personAmountError: undefined } };
     } else if (id === 'visitType' && this.state.visitType !== data.value) {
       newState = values;
     }
@@ -130,21 +130,21 @@ class Form extends React.Component {
     const mandatoryFields = [this.state.name, this.state.email, this.state.phone, date, this.state.arrivalTime,
       this.state.departTime, this.state.personAmount, this.state.type];
     if (!mandatoryFields.includes('') && !mandatoryFields.includes(undefined)) {
-      this.setState({ errors: { ...this.state.errors, mandatoryFields: undefined }});
+      this.setState({ errors: { ...this.state.errors, mandatoryFields: undefined } });
       return true;
     }
     return false;
-    // return true;
   }
 
 
   sendMail = () => {
     if (this.isValid() && !this.state.errors.personAmountError) {
-      const html = createHTML(this.createDataFields());
+      const description = lan === 'en' && 'Asiakas on tehnyt tarjouspyynnön englanninkielisillä sivuilla.';
+      const html = createHTML(this.createDataFields(), description);
       this.props.sendMail(this.state.email, html);
     } else {
       const e = lan === 'fi' ? 'Täytä pakolliset kentät!' : 'Please fill out all mandatory fields!';
-      this.setState({ errors: { ...this.state.errors, mandatoryFields: e }});
+      this.setState({ errors: { ...this.state.errors, mandatoryFields: e } });
     }
   }
 
@@ -156,11 +156,11 @@ class Form extends React.Component {
       [this.getObject('email').fi]: data.email,
       [this.getObject('phone').fi]: data.phone,
       [this.getObject('dates').fi]: this.dateToStr(data.from, data.to),
-      [this.getObject('arrivalTime').fi]: data.arrivalTime,
-      [this.getObject('departTime').fi]: data.departTime,
+      [this.getObject('arrivalTime').fi]: `klo ${data.arrivalTime}`,
+      [this.getObject('departTime').fi]: `klo ${data.departTime}`,
       [this.getObject('personAmount').fi]: data.personAmount,
       Asiakastyyppi: this.getObject(data.type).fi,
-      Hinta: this.calculatePrice(),
+      Hinta: `${this.calculatePrice()} €`,
     };
     const foods = ['breakfastCoffee', 'breakFast', 'nokipannu', 'dessert', 'supper', 'lunch', 'lunchType', 'dinner', 'dinnerType', 'allergies'];
     const food = { title: 'Tarjoilut' };
@@ -212,7 +212,13 @@ class Form extends React.Component {
         }
       }
     });
-    return { basicInfo, food, activities, extraServices, visitDetails };
+    return {
+      basicInfo,
+      food,
+      activities,
+      extraServices,
+      visitDetails,
+    };
   }
 
 
@@ -242,7 +248,7 @@ class Form extends React.Component {
     const dateValue = this.dateToStr(from, to);
     const timeOptions = this.getTimeOptions();
     return (
-      <Container style={{ padding: '20px 0 20px 0' }}>
+      <Container style={{ margin: '20px 0 20px 0' }}>
         <SemanticForm style={{ maxWidth: '900px' }} noValidate="novalidate">
           <Header as="h4" dividing>{this.getObject('contactDetails')[lan]}</Header>
           <SemanticForm.Group widths="equal">
@@ -261,7 +267,7 @@ class Form extends React.Component {
               trigger={
                 <SemanticForm.Input
                   required
-                  width={7}
+                  width={5}
                   label={this.getObject('dates')[lan]}
                   icon="calendar alternate outline"
                   id="dates"
@@ -290,7 +296,7 @@ class Form extends React.Component {
             />
             <SemanticForm.Select
               label={from ? `${this.getObject('arrivalTime')[lan]} ${moment(from).format('DD.MM.YYYY')}` : this.getObject('arrivalTime')[lan]}
-              width={3}
+              width={4}
               compact
               required
               placeholder="hh:mm"
@@ -300,7 +306,7 @@ class Form extends React.Component {
             />
             <SemanticForm.Select
               label={to ? `${this.getObject('departTime')[lan]} ${moment(to).format('DD.MM.YYYY')}` : `${this.getObject('departTime')[lan]} ${dateValue}`}
-              width={3}
+              width={4}
               compact
               required
               placeholder="hh:mm"
@@ -330,9 +336,10 @@ class Form extends React.Component {
             <Message negative>
               <Message.List>
                 {Object.values(this.state.errors).map(e =>
-                  <Message.Item>{e}</Message.Item>)}
-                </Message.List>
-              </Message>
+                  e && <Message.Item>{e}</Message.Item>
+                )}
+              </Message.List>
+            </Message>
             }
           { this.state.type === 'company' &&
             <CompanyForm
