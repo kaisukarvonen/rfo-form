@@ -142,6 +142,7 @@ class Form extends React.Component {
       const description = lan === 'en' && 'Asiakas on tehnyt tarjouspyynnön englanninkielisillä sivuilla.';
       const html = createHTML(this.createDataFields(), description);
       this.props.sendMail(this.state.email, html);
+      window.scrollTo(0, 0);
     } else {
       const e = lan === 'fi' ? 'Täytä pakolliset kentät!' : 'Please fill out all mandatory fields!';
       this.setState({ errors: { ...this.state.errors, mandatoryFields: e } });

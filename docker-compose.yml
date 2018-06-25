@@ -1,0 +1,32 @@
+version: "3"
+services:
+
+  rfo-form-backend:
+    container_name: rfo-form-backend
+    build: ./server/
+    volumes:
+      - './server:/usr/src/'
+      - './server/package.json:/usr/src/package.json'
+      - '/usr/src/node_modules'
+    ports:
+      - '3001:3001'
+    links:
+      - mongodb
+
+  rfo-form-client:
+    container_name: rfo-form-client
+    build: ./client/
+    volumes:
+      - './client:/usr/src/'
+      - './client/package.json:/usr/src/package.json'
+    ports:
+      - '3000:3000'
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    command: mongod --auth
+    ports:
+      - "27017:27017"
+    volumes:
+      - '/data/db:/data/db/'
