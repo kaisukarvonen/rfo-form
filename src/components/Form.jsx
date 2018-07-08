@@ -8,7 +8,7 @@ import moment from 'moment';
 import CompanyForm from './CompanyForm';
 import PrivatePersonForm from './PrivatePersonForm';
 import createHTML from './Template';
-import lan from '../utils';
+import { lan, getCalendarEvents } from '../utils';
 
 class Form extends React.Component {
   state = {
@@ -20,6 +20,13 @@ class Form extends React.Component {
     personAmount: 1,
     errors: {},
   };
+
+  componentDidMount = () => {
+    getCalendarEvents().then((response) => {
+      console.log(response.data);
+      console.log(response.data.items);
+    })
+  }
 
   componentDidUpdate(prevProps, prevState) {
     if (this.state.locationType && (prevState.personAmount !== this.state.personAmount || prevState.locationType !== this.state.locationType)) {

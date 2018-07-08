@@ -1,5 +1,5 @@
 import * as axios from 'axios';
-import baseUrl from '../config';
+import { baseUrl } from '../../config';
 
 function fetch() {
   const promise =

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Header, Form } from 'semantic-ui-react';
-import lan from '../utils';
+import { lan } from '../utils';
 
 class PrivatePersonForm extends React.Component {
   state = { popupOpen: false };

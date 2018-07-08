@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Icon, Transition } from 'semantic-ui-react';
-import lan from '../utils';
+import { lan } from '../utils';
 
 const propTypes = {
   notification: PropTypes.object,

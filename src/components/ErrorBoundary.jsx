@@ -1,6 +1,6 @@
 import React from 'react';
 import { Header, Icon } from 'semantic-ui-react';
-import lan from '../utils';
+import { lan } from '../utils';
 
 
 class ErrorBoundary extends React.Component {

@@ -9,7 +9,7 @@ import * as mailActions from '../dux/mail';
 import * as notificationActions from '../dux/notification';
 import '../css/styles.css';
 import '../css/DayPicker.css';
-import lan from '../utils';
+import { lan } from '../utils';
 
 import ErrorBoundary from './ErrorBoundary';
 import Notification from './Notification';
