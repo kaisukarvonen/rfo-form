@@ -18,9 +18,10 @@ class PrivatePersonForm extends React.Component {
     const { values } = this.props;
     return (
       <div>
-        <Header as="h4" dividing>{this.props.getObject('visitTypeTitle')[lan]}</Header>
+        <Header as="h4">{this.props.getObject('visitTypeTitle')[lan]}</Header>
         <Form.Radio label={this.props.getObject('birthday')[lan]} value="birthday" checked={values.visitType === 'birthday'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
         <Form.Radio label={this.props.getObject('bachelor')[lan]} value="bachelor" checked={values.visitType === 'bachelor'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
+        <Form.Radio label={this.props.getObject('party')[lan]} value="party" checked={values.visitType === 'party'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
         <Form.Input width={8} label={this.props.getObject('visitTypeString')[lan]} id="visitTypeString" value={values.visitTypeString} onChange={this.props.handleOnChange} />
       </div>
     );

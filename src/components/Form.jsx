@@ -1,11 +1,12 @@
 import React from 'react';
-import { Container, Header, Form as SemanticForm, Popup, Icon, Grid, Label, Message, Button } from 'semantic-ui-react';
+import { Container, Header, Form as SemanticForm, Popup, Icon, Grid, Label, Message, Button, Accordion } from 'semantic-ui-react';
 import _ from 'lodash';
 import DayPicker from 'react-day-picker';
 import MomentLocaleUtils from 'react-day-picker/moment';
 import 'moment/locale/fi';
 import moment from 'moment';
 import CompanyForm from './CompanyForm';
+import Extras from './Extras';
 import PrivatePersonForm from './PrivatePersonForm';
 import createHTML from './Template';
 import { lan, getCalendarEvents } from '../utils';
@@ -16,16 +17,16 @@ class Form extends React.Component {
     popupOpen: false,
     from: undefined,
     to: undefined,
-    lunch: false,
     personAmount: 1,
     errors: {},
+    activeIndex: 0,
   };
 
   componentDidMount = () => {
     getCalendarEvents().then((response) => {
       console.log(response.data);
       console.log(response.data.items);
-    })
+    });
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -37,7 +38,7 @@ class Form extends React.Component {
         const { max } = object;
         if (this.state.personAmount < min || this.state.personAmount > max) {
           error = lan === 'fi' ? `Antamasi henkilömäärä ei täsmää valitsemasi tilan '${object[lan]}' kanssa` :
-            `You cannot visit ${object[lan]} with ${this.state.personAmount} persons, please select another location`;
+            `You cannot visit ${object[lan]} with ${this.state.personAmount} persons, please change your selections`;
         }
       }
       this.setState({ errors: { ...this.state.errors, personAmountError: error } });
@@ -45,7 +46,7 @@ class Form extends React.Component {
   }
 
   getTimeOptions = () => {
-    const times = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+    const times = ['08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18'];
     const options = [];
     times.forEach((hour) => {
       options.push({ key: hour, value: hour, text: `${hour}:00` });
@@ -71,7 +72,9 @@ class Form extends React.Component {
     let newState = {};
     const values = { locationType: undefined, meetingType: undefined, visitTypeString: '' };
     if (id === 'type' && this.state.type !== data.value) {
-      newState = { ...values, visitType: undefined, companyName: '', errors: { ...this.state.errors, personAmountError: undefined } };
+      newState = {
+        ...values, visitType: undefined, companyName: '', errors: { ...this.state.errors, personAmountError: undefined },
+      };
     } else if (id === 'visitType' && this.state.visitType !== data.value) {
       newState = values;
     }
@@ -240,6 +243,12 @@ class Form extends React.Component {
   }
 
 
+  showInfo = (object) => {
+    const infoField = lan === 'fi' ? 'infoFi' : 'infoEn';
+    return object[infoField];
+  }
+
+
   render() {
     const styles = {
       categoryHeader: {
@@ -307,6 +316,7 @@ class Form extends React.Component {
               width={4}
               compact
               required
+              disabled={this.state.type !== 'company'}
               placeholder="hh:mm"
               options={timeOptions}
               id="arrivalTime"
@@ -317,6 +327,7 @@ class Form extends React.Component {
               width={4}
               compact
               required
+              disabled={this.state.type !== 'company'}
               placeholder="hh:mm"
               options={timeOptions}
               id="departTime"
@@ -334,7 +345,7 @@ class Form extends React.Component {
             />
 
           </SemanticForm.Group>
-          <Header as="h4">{this.getObject('clientTypeTitle')[lan]}</Header>
+          <Header as="h4">{this.getObject('clientTypeTitle')[lan]} <sup style={{ color: 'red', fontSize: '14px' }}>*</sup></Header>
           <SemanticForm.Group inline>
             <SemanticForm.Radio style={{ paddingRight: '26px', fontSize: '16px' }} label={this.getObject('company')[lan]} value="company" checked={this.state.type === 'company'} onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')} />
             <SemanticForm.Radio style={{ fontSize: '16px' }} label={this.getObject('private')[lan]} value="private" checked={this.state.type === 'private'} onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')} />
@@ -344,8 +355,7 @@ class Form extends React.Component {
             <Message negative>
               <Message.List>
                 {Object.values(this.state.errors).map(e =>
-                  e && <Message.Item>{e}</Message.Item>
-                )}
+                  e && <Message.Item>{e}</Message.Item>)}
               </Message.List>
             </Message>
             }
@@ -355,6 +365,7 @@ class Form extends React.Component {
               handleOnChange={this.handleOnChange}
               handleOnRadioChange={this.handleOnRadioChange}
               values={this.state}
+              showInfo={this.showInfo}
             /> }
           { this.state.type === 'private' &&
             <PrivatePersonForm
@@ -363,68 +374,14 @@ class Form extends React.Component {
               handleOnRadioChange={this.handleOnRadioChange}
               values={this.state}
             /> }
-          <Header as="h4" dividing style={{ paddingTop: '0.5em' }}>{this.getObject('servicesTitle')[lan]}</Header>
-          <Grid style={{ marginBottom: '1px' }}>
-            <Grid.Column width={5}>
-              <SemanticForm.Checkbox label={this.getObject('linen')[lan]} id="linen" checked={this.state.linen} onChange={this.handleOnChange} />
-              <SemanticForm.Checkbox label={this.getObject('towels')[lan]} id="towels" checked={this.state.towels} onChange={this.handleOnChange} />
-              <SemanticForm.Checkbox label={this.getObject('hottub')[lan]} id="hottub" checked={this.state.hottub} onChange={this.handleOnChange} />
-            </Grid.Column>
-            <Grid.Column width={3}>
-              <p>{this.getObject('linen').price} € + {lan === 'fi' ? 'alv' : 'vat'}</p>
-              <p>{this.getObject('towels').price} € + {lan === 'fi' ? 'alv' : 'vat'}</p>
-              <p>{this.getObject('hottub').price} € + {lan === 'fi' ? 'alv' : 'vat'}</p>
-            </Grid.Column>
-          </Grid>
-          { this.state.type === 'company' && this.state.visitType === 'meeting' &&
-          <p style={styles.categoryHeader} onClick={() => { this.setState({ showMeetingEquipment: !this.state.showMeetingEquipment }); }}>
-              {this.getObject('meetingEquipment')[lan]}
-            <Icon name="angle down" />
-          </p>
-            }
-          { this.state.showMeetingEquipment &&
-            <div style={styles.categoryItems}>
-              {this.getObject('meetingEquipment').options.map(i =>
-                <SemanticForm.Checkbox label={i[lan]} id={i.key} checked={this.state[i.key]} onChange={this.handleOnChange} />)}
-            </div>}
-          <Header as="h5">{this.getObject('foodService')[lan]}</Header>
-          <SemanticForm.Checkbox label={this.getObject('breakfastCoffee')[lan]} id="breakfastCoffee" onChange={this.handleOnChange} />
-          <SemanticForm.Checkbox label={this.getObject('breakfast')[lan]} id="breakfast" onChange={this.handleOnChange} />
-          <SemanticForm.Group inline>
-            <SemanticForm.Checkbox label={this.getObject('lunch')[lan]} id="lunch" checked={this.state.lunch} onChange={this.handleOnChange} />
-            <p style={styles.categoryHeader} onClick={() => { this.setState({ lunch: !this.state.lunch }); }}><Icon name="angle down" /> {this.foodOptions('lunch')}</p>
-          </SemanticForm.Group>
-          {this.state.lunch &&
-            <div style={styles.categoryItems}>
-              { this.getObject('lunch').options.map(i =>
-                <SemanticForm.Radio label={i[lan]} value={i.key} checked={this.state.lunchType === i.key} onChange={(e, data) => this.handleOnRadioChange(e, data, 'lunchType')} />)}
-            </div>
-          }
-          <SemanticForm.Checkbox label={this.getObject('nokipannu')[lan]} id="nokipannu" checked={this.state.nokipannu} onChange={this.handleOnChange} />
-          <SemanticForm.Checkbox label={this.getObject('dessert')[lan]} id="dessert" checked={this.state.dessert} onChange={this.handleOnChange} />
-          <SemanticForm.Group inline>
-            <SemanticForm.Checkbox label={this.getObject('dinner')[lan]} id="dinner" checked={this.state.dinner} onChange={this.handleOnChange} />
-            <p style={styles.categoryHeader} onClick={() => { this.setState({ dinner: !this.state.dinner }); }}><Icon name="angle down" /> {this.foodOptions('dinner')}</p>
-          </SemanticForm.Group>
-          {this.state.dinner &&
-            <div style={styles.categoryItems}>
-              {this.getObject('dinner').options.map(i =>
-                <SemanticForm.Radio label={i[lan]} value={i.key} checked={this.state.dinnerType === i.key} onChange={(e, data) => this.handleOnRadioChange(e, data, 'dinnerType')} />)}
-            </div>
-          }
-          <SemanticForm.Checkbox label={this.getObject('supper')[lan]} id="supper" checked={this.state.supper} onChange={this.handleOnChange} />
-          <SemanticForm.TextArea rows={2} autoHeight label={this.getObject('allergies')[lan]} id="allergies" onChange={this.handleOnChange} width={10} />
-          <Header as="h5">{this.getObject('activityTitle')[lan]}</Header>
-          <p style={styles.categoryHeader} onClick={() => { this.setState({ showRental: !this.state.showRental }); }}>{this.getObject('rentalTitle')[lan]} <Icon name="angle down" /></p>
-          {this.state.showRental &&
-            <div style={styles.categoryItems}>
-              {this.getObject('rentalTitle').options.map(i =>
-                <SemanticForm.Checkbox label={i[lan]} id={i.key} checked={this.state[i.key]} onChange={this.handleOnChange} />)}
-            </div>
-          }
-          { this.getObject('activityOptions').options.map(i =>
-            <SemanticForm.Checkbox label={i[lan]} id={i.key} checked={this.state[i.key]} onChange={this.handleOnChange} />)
-          }
+          { this.state.type &&
+            <Extras
+              getObject={this.getObject}
+              showInfo={this.showInfo}
+              values={this.state}
+              handleOnChange={this.handleOnChange}
+            />
+        }
           <Header as="h4" dividing>{this.getObject('priceTitle')[lan]}</Header>
           {lan === 'fi' ?
             <p>

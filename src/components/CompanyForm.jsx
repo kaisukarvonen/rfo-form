@@ -24,13 +24,13 @@ class CompanyForm extends React.Component {
     return (
       <React.Fragment>
         <Form.Input width={8} label={this.props.getObject('companyName')[lan]} id="companyName" value={values.companyName} onChange={this.props.handleOnChange} />
-        <Header as="h4" dividing>{this.props.getObject('visitTypeTitle')[lan]}</Header>
+        <Header as="h4">{this.props.getObject('visitTypeTitle')[lan]}</Header>
         <Form.Radio label={this.props.getObject('meeting')[lan]} value="meeting" checked={values.visitType === 'meeting'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
         <Form.Radio label={this.props.getObject('recreational')[lan]} value="recreational" checked={values.visitType === 'recreational'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'visitType')} />
         <Form.Input width={8} label={this.props.getObject('visitTypeString')[lan]} id="visitTypeString" value={values.visitTypeString} onChange={this.props.handleOnChange} />
         { values.visitType === 'meeting' &&
         <React.Fragment>
-          <Header as="h4" dividing>{this.props.getObject('meetingTitle')[lan]}</Header>
+          <Header as="h4">{this.props.getObject('meetingTitle')[lan]}</Header>
           <Grid>
             { this.props.getObject('meetingOptions').options.map(m =>
               (
@@ -38,7 +38,7 @@ class CompanyForm extends React.Component {
                   <Grid.Column width={10}>
                     <Form.Field inline>
                       <Checkbox radio label={m[lan]} value={m.key} checked={values.meetingType === m.key} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'meetingType')} />
-                      { m.info && <InfoPopup icon="info circle" content={m.info} />}
+                      { this.props.showInfo(m) && <InfoPopup icon="info circle" content={this.props.showInfo(m)} />}
                     </Form.Field>
                   </Grid.Column>
                   <Grid.Column width={2}>
@@ -56,12 +56,13 @@ class CompanyForm extends React.Component {
 
         { (values.visitType || values.visitTypeString.length > 0) &&
           <React.Fragment>
-            <Header as="h4" dividing>{this.props.getObject('locationTitle')[lan]}</Header>
+            <Header as="h4">{this.props.getObject('locationTitle')[lan]}</Header>
             <Form.Radio label={this.displayLimits(this.props.getObject('villaParatiisi'))} value="villaParatiisi" checked={values.locationType === 'villaParatiisi'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} />
-            <Form.Radio label={this.displayLimits(this.props.getObject('pohjoinenPortti'))} value="pohjoinenPortti" checked={values.locationType === 'pohjoinenPortti'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} />
+            {/* <Form.Radio label={this.displayLimits(this.props.getObject('pohjoinenPortti'))} value="pohjoinenPortti" checked={values.locationType === 'pohjoinenPortti'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} /> */}
             { values.visitType !== 'meeting' &&
             <React.Fragment>
               <Form.Radio label={this.props.getObject('ilmanTiloja')[lan]} value="ilmanTiloja" checked={values.locationType === 'ilmanTiloja'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} />
+              <Form.Radio label={this.props.getObject('haltia')[lan]} value="haltia" checked={values.locationType === 'haltia'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} />
             </React.Fragment>
             }
           </React.Fragment>
