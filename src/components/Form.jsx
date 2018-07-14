@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Header, Form as SemanticForm, Popup, Icon, Grid, Label, Message, Button, Accordion } from 'semantic-ui-react';
+import { Container, Header, Form as SemanticForm, Popup, Label, Message } from 'semantic-ui-react';
 import _ from 'lodash';
 import DayPicker from 'react-day-picker';
 import MomentLocaleUtils from 'react-day-picker/moment';
@@ -20,12 +20,14 @@ class Form extends React.Component {
     personAmount: 1,
     errors: {},
     activeIndex: 0,
+    disabledDays: [],
+    partyAvailableDays: [],
   };
 
   componentDidMount = () => {
     getCalendarEvents().then((response) => {
-      console.log(response.data);
       console.log(response.data.items);
+      // TODO: list items in disabled, partly available lists
     });
   }
 
@@ -75,6 +77,9 @@ class Form extends React.Component {
       newState = {
         ...values, visitType: undefined, companyName: '', errors: { ...this.state.errors, personAmountError: undefined },
       };
+      if (data.value === 'private') {
+        newState = { ...newState, departTime: '12', arrivalTime: '16' };
+      }
     } else if (id === 'visitType' && this.state.visitType !== data.value) {
       newState = values;
     }
@@ -107,7 +112,12 @@ class Form extends React.Component {
     }
     // do not change on past days
     if (moment().diff(day, 'days') <= 0) {
-      this.setState({ to, from });
+      let { arrivalTime, departTime } = this.state;
+      if (this.state.type !== 'company') {
+        arrivalTime = '16';
+        departTime = '12';
+      }
+      this.setState({ to, from, arrivalTime, departTime });
     }
   }
 
@@ -118,18 +128,19 @@ class Form extends React.Component {
   }
 
   calculatePrice = () => {
+    // alvPrice
+    let priceField = this.state.type === 'company' ? 'price' : 'alvPrice';
     let price = 0;
-    if (this.state.meetingType) {
-      price += this.getObjectInList('meetingOptions', this.state.meetingType).price;
-    }
-    if (this.state.linen) {
-      price += this.getObject('linen').price * this.state.personAmount;
-    }
-    if (this.state.towels) {
-      price += this.getObject('towels').price * this.state.personAmount;
-    }
-    if (this.state.hottub) {
-      price += this.getObject('hottub').price;
+    const { linen, towels, hottub, meetingType, visitType } = this.state;
+    price = meetingType ? this.getObjectInList('meetingOptions', this.state.meetingType).price : 0;
+    price += (linen ? this.getObject('linen')[priceField] * this.state.personAmount : 0) +
+    (towels ? this.getObject('towels')[priceField] * this.state.personAmount : 0) +
+    (hottub ? this.getObject('hottub')[priceField] : 0);
+    this.getObject('rentalEquipment').options.forEach((option) => {
+      price += this.state[option.key] ? option.alvPrice : 0;
+    });
+    if (visitType !== 'meeting') {
+      // TODO: calculate days
     }
     return price;
   }
@@ -173,38 +184,23 @@ class Form extends React.Component {
       Asiakastyyppi: this.getObject(data.type).fi,
       Hinta: `${this.calculatePrice()} €`,
     };
-    const foods = ['breakfastCoffee', 'breakFast', 'nokipannu', 'dessert', 'supper', 'lunch', 'lunchType', 'dinner', 'dinnerType', 'allergies'];
     const food = { title: 'Tarjoilut' };
-    foods.forEach((f) => {
-      if (data[f]) {
-        if (f === 'lunchType') {
-          food.Lounasvalinta = this.getObjectInList('lunch', data[f]).fi;
-        } else if (f === 'dinnerType') {
-          food.Illallisvalinta = this.getObjectInList('dinner', data[f]).fi;
-        } else {
-          food[this.getObject(f).fi] = typeof (data[f]) === 'boolean' ? 'Kyllä' : data[f];
-        }
-      }
+    this.getObject('foodOptions').options.forEach((ac) => {
+      food[this.getObjectInList('foodOptions', ac.key).fi] = data[ac.key] ? 'Kyllä' : undefined;
     });
-
-    const activities = { title: 'Aktiviteetit' };
+    const activities = { title: 'Aktiviteetit ja ohjelmat' };
     this.getObject('activityOptions').options.forEach((ac) => {
       if (data[ac.key]) {
         activities[this.getObjectInList('activityOptions', ac.key).fi] = 'Kyllä';
       }
     });
-    this.getObject('rentalTitle').options.forEach((rental) => {
-      if (data[rental.key]) {
-        activities[this.getObjectInList('rentalTitle', rental.key).fi] = 'Kyllä';
-      }
+    this.getObject('rentalOptions').options.forEach((rental) => {
+      food[this.getObjectInList('rentalOptions', rental.key).fi] = data[rental.key] ? 'Kyllä' : undefined;
     });
     const services = ['linen', 'towels', 'hottub'];
     const extraServices = { title: 'Lisäpalvelut' };
-    services.forEach((s) => {
-      if (data[s]) {
-        extraServices[this.getObject(s).fi] = 'Kyllä';
-      }
-    });
+    services.forEach((s) => { extraServices[this.getObject(s).fi] = data[s] ? 'Kyllä' : undefined; });
+
     const visitDetails = { title: 'Vierailun lisätiedot' };
     const details = ['companyName', 'visitType', 'visitTypeString', 'meetingType', 'locationType'];
     details.forEach((d) => {
@@ -223,6 +219,8 @@ class Form extends React.Component {
         }
       }
     });
+
+    // lisää tähän kokousvälineet, kaikki ohjelmat
     return {
       basicInfo,
       food,
@@ -235,8 +233,15 @@ class Form extends React.Component {
 
   dateToStr = (from, to) => {
     if (from && to) {
+      if (this.state.type !== 'company') {
+        return moment(to).diff(moment(from), 'days') !== 0 ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}` :
+        `${moment(from).format('DD.MM.YYYY')} - ${moment(from).add(1, 'days').format('DD.MM.YYYY')}`;
+      }
       return moment(to).diff(moment(from), 'days') !== 0 ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}` : moment(from).format('DD.MM.YYYY');
     } else if (from && !to) {
+      if (this.state.type !== 'company') {
+        return `${moment(from).format('DD.MM.YYYY')} - ${moment(from).add(1, 'days').format('DD.MM.YYYY')}`;
+      }
       return moment(from).format('DD.MM.YYYY');
     }
     return '';
@@ -250,16 +255,6 @@ class Form extends React.Component {
 
 
   render() {
-    const styles = {
-      categoryHeader: {
-        cursor: 'pointer',
-        width: '180px',
-        marginTop: 0,
-      },
-      categoryItems: {
-        padding: '0 0 12px 12px',
-      },
-    };
     const { from, to } = this.state;
     const modifiers = { start: from, end: to };
     const dateValue = this.dateToStr(from, to);
@@ -288,7 +283,6 @@ class Form extends React.Component {
                   label={this.getObject('dates')[lan]}
                   icon="calendar alternate outline"
                   id="dates"
-                  readOnly
                   value={dateValue}
                 />
                  }
@@ -305,31 +299,34 @@ class Form extends React.Component {
                     selectedDays={[from, { from, to }]}
                     disabledDays={[{ before: new Date() }, new Date(2018, 6, 28)]}
                   />
-                  <p><Label style={{ backgroundColor: '#c2e2b3', margin: '0 12px 0 20px' }} size="large" circular empty />
-                    {lan === 'fi' ? 'Varattavissa oleva päivä' : 'Available for booking'}
+                  <p>
+                    <Label style={{ backgroundColor: '#c2e2b3', margin: '0 12px 0 20px' }} size="large" circular empty />{lan === 'fi' ? 'Vapaa' : 'Available'}
+                    <Label style={{ backgroundColor: '#c2e2b3', margin: '0 12px 0 20px' }} size="large" circular empty />{lan === 'fi' ? 'Osittain vapaa' : 'Partly available'}
                   </p>
                 </React.Fragment>
                  }
             />
             <SemanticForm.Select
-              label={from ? `${this.getObject('arrivalTime')[lan]} ${moment(from).format('DD.MM.YYYY')}` : this.getObject('arrivalTime')[lan]}
+              label={this.getObject('arrivalTime')[lan]}
               width={4}
               compact
               required
-              disabled={this.state.type !== 'company'}
+              style={{ pointerEvents: this.state.type === 'company' ? 'auto' : 'none' }}
               placeholder="hh:mm"
               options={timeOptions}
+              value={this.state.arrivalTime}
               id="arrivalTime"
               onChange={this.handleOnChange}
             />
             <SemanticForm.Select
-              label={to ? `${this.getObject('departTime')[lan]} ${moment(to).format('DD.MM.YYYY')}` : `${this.getObject('departTime')[lan]} ${dateValue}`}
+              label={this.getObject('departTime')[lan]}
               width={4}
               compact
               required
-              disabled={this.state.type !== 'company'}
+              style={{ pointerEvents: this.state.type === 'company' ? 'auto' : 'none' }}
               placeholder="hh:mm"
               options={timeOptions}
+              value={this.state.departTime}
               id="departTime"
               onChange={this.handleOnChange}
             />
@@ -343,20 +340,29 @@ class Form extends React.Component {
               value={this.state.personAmount}
               onChange={this.handleOnChange}
             />
-
           </SemanticForm.Group>
-          <Header as="h4">{this.getObject('clientTypeTitle')[lan]} <sup style={{ color: 'red', fontSize: '14px' }}>*</sup></Header>
+
+          <Message>
+            <Message.Content>
+              { lan === 'fi' ? `Tilavuokra Villa Paratiisissa on ensimmäiseltä yöltä ${this.getObject('acommodationPrices')['1']}€ ja seuraavilta ${this.getObject('acommodationPrices')['2']}€.
+              Hinta sisältää klo 16-12 välisen oleskelun.`
+                    :
+                    `Accommodation price in Villa Paratiisi is for the first night ${this.getObject('acommodationPrices')['1']}€ and for all following ${this.getObject('acommodationPrices')['2']}€. Price includes stay from 16 to 12 o'clock.`
+                  }
+            </Message.Content>
+          </Message>
+
+          <Header as="h4">{this.getObject('clientTypeTitle')[lan]} <sup style={{ color: '#db2828', fontSize: '14px' }}>*</sup></Header>
           <SemanticForm.Group inline>
-            <SemanticForm.Radio style={{ paddingRight: '26px', fontSize: '16px' }} label={this.getObject('company')[lan]} value="company" checked={this.state.type === 'company'} onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')} />
-            <SemanticForm.Radio style={{ fontSize: '16px' }} label={this.getObject('private')[lan]} value="private" checked={this.state.type === 'private'} onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')} />
+            <SemanticForm.Radio style={{ paddingRight: '26px' }} label={this.getObject('company')[lan]} value="company" checked={this.state.type === 'company'} onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')} />
+            <SemanticForm.Radio label={this.getObject('private')[lan]} value="private" checked={this.state.type === 'private'} onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')} />
           </SemanticForm.Group>
 
-          { (this.state.errors.personAmountError || this.state.errors.mandatoryFields) &&
+          { this.state.errors.mandatoryFields &&
             <Message negative>
-              <Message.List>
-                {Object.values(this.state.errors).map(e =>
-                  e && <Message.Item>{e}</Message.Item>)}
-              </Message.List>
+              <Message.Content>
+                {this.state.errors.mandatoryFields}
+              </Message.Content>
             </Message>
             }
           { this.state.type === 'company' &&
@@ -367,6 +373,13 @@ class Form extends React.Component {
               values={this.state}
               showInfo={this.showInfo}
             /> }
+          { this.state.errors.personAmountError &&
+          <Message negative>
+            <Message.Content>
+              {this.state.errors.personAmountError}
+            </Message.Content>
+          </Message>
+              }
           { this.state.type === 'private' &&
             <PrivatePersonForm
               getObject={this.getObject}
@@ -385,15 +398,21 @@ class Form extends React.Component {
           <Header as="h4" dividing>{this.getObject('priceTitle')[lan]}</Header>
           {lan === 'fi' ?
             <p>
-              {`Hinta sisältäen tilavarauksen, siivouksen${this.state.linen ? ', liinavaatteet' : ''}${this.state.towels ? ', pyyhkeet' : ''}${this.state.hottub ? ', paljun' : ''}:
+              {`Hinta sisältäen tilavarauksen, siivouksen, valitut vuokravälineet${this.state.linen ? ', liinavaatteet' : ''}${this.state.towels ? ', pyyhkeet' : ''}${this.state.hottub ? ', paljun' : ''}:
               ${this.calculatePrice()} €`}<br />Tarjoilujen ja lisäpalveluiden hinnat määräytyvät saatavuuden mukaan
             </p>
           :
             <p>
-              {`Price including accommodation, cleaning${this.state.linen ? ', linen' : ''}${this.state.linen ? ', towels' : ''}${this.state.hottub ? ', hot tub' : ''}:
+              {`Price including accommodation, cleaning, chosen rental equipments${this.state.linen ? ', linen' : ''}${this.state.linen ? ', towels' : ''}${this.state.hottub ? ', hot tub' : ''}:
             ${this.calculatePrice()} €`}<br />Food and other extra service prices depend on availability
             </p>
           }
+          { this.state.type &&
+            <Message>
+              <Message.Content>
+                { this.getObject('paymentInfo')[this.state.type][lan] }
+              </Message.Content>
+            </Message>}
           <SemanticForm.Button primary content={lan === 'fi' ? 'Lähetä' : 'Send'} onClick={this.sendMail} />
         </SemanticForm>
       </Container>

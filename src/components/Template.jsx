@@ -13,7 +13,7 @@ function createHTML(data, description) {
             <Item style={header}><Span fontSize={17}>{data[innerObject].title}</Span></Item>
             { Object.keys(data[innerObject]).map(key =>
               (
-                key !== 'title' &&
+                key !== 'title' && data[innerObject][key] &&
                 <Item>
                   <Span fontSize={13} style={{ display: 'inline-block', width: '200px' }}>
                     {`${key}`}

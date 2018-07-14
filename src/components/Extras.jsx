@@ -2,6 +2,7 @@ import React from 'react';
 import { Header, Form, Divider, Icon, Grid, Accordion, Checkbox } from 'semantic-ui-react';
 import _ from 'lodash';
 import InfoPopup from './InfoPopup';
+import CustomAccordion from './CustomAccordion';
 import { lan } from '../utils';
 
 class Extras extends React.Component {
@@ -44,26 +45,120 @@ class Extras extends React.Component {
     return (
       <React.Fragment>
         <Divider />
+
+        { values.visitType === 'meeting' &&
+        <CustomAccordion
+          values={values}
+          accordions={accordions}
+          handleOnChange={this.props.handleOnChange}
+          handleAccordionClick={this.handleAccordionClick}
+          showInfo={this.props.showInfo}
+          getObject={this.props.getObject}
+          title="meetingEquipment"
+          index={1}
+        />
+      }
+
+        <CustomAccordion
+          values={values}
+          accordions={accordions}
+          handleOnChange={this.props.handleOnChange}
+          handleAccordionClick={this.handleAccordionClick}
+          showInfo={this.props.showInfo}
+          getObject={this.props.getObject}
+          title="foodOptions"
+          index={2}
+        />
+        { lan === 'fi' ? '* Huomioimme kaikki erityisruokavaliot' : '* We cater to all dietary needs '}
+
+        <Header as="h4" dividing>{this.props.getObject('programs')[lan]}</Header>
+        <CustomAccordion
+          small
+          values={values}
+          accordions={accordions}
+          handleOnChange={this.props.handleOnChange}
+          handleAccordionClick={this.handleAccordionClick}
+          showInfo={this.props.showInfo}
+          getObject={this.props.getObject}
+          title="wellbeing"
+          index={3}
+        />
+        <CustomAccordion
+          small
+          values={values}
+          accordions={accordions}
+          handleOnChange={this.props.handleOnChange}
+          handleAccordionClick={this.handleAccordionClick}
+          showInfo={this.props.showInfo}
+          getObject={this.props.getObject}
+          title="water"
+          index={4}
+        />
+        <CustomAccordion
+          small
+          values={values}
+          accordions={accordions}
+          handleOnChange={this.props.handleOnChange}
+          handleAccordionClick={this.handleAccordionClick}
+          showInfo={this.props.showInfo}
+          getObject={this.props.getObject}
+          title="forest"
+          index={5}
+        />
+        <CustomAccordion
+          small
+          values={values}
+          accordions={accordions}
+          handleOnChange={this.props.handleOnChange}
+          handleAccordionClick={this.handleAccordionClick}
+          showInfo={this.props.showInfo}
+          getObject={this.props.getObject}
+          title="otherPrograms"
+          index={6}
+        />
+        <CustomAccordion
+          small
+          values={values}
+          accordions={accordions}
+          handleOnChange={this.props.handleOnChange}
+          handleAccordionClick={this.handleAccordionClick}
+          showInfo={this.props.showInfo}
+          getObject={this.props.getObject}
+          title="workplaceTraining"
+          index={7}
+        />
+
+        <Divider />
+
+
         <Accordion>
-          <Accordion.Title active={accordions.includes(2)} index={2} onClick={this.handleAccordionClick}>
-            <Header as="h4"><Icon name="dropdown" />{this.props.getObject('foodOptions')[lan]}</Header>
+          <Accordion.Title active={accordions.includes(8)} index={8} onClick={this.handleAccordionClick}>
+            <Header as="h4"><Icon name="dropdown" />{this.props.getObject('rentalEquipment')[lan]}</Header>
           </Accordion.Title>
-          <Accordion.Content active={accordions.includes(2)}>
-            {this.props.getObject('foodOptions').options.map(i => (
-              <Form.Field inline>
-                <Checkbox label={i[lan]} id={i.key} checked={this.state[i.key]} onChange={this.props.handleOnChange} />
-                { this.props.showInfo(i) && <InfoPopup icon="info circle" content={this.props.showInfo(i)} /> }
-              </Form.Field>
-            ))}
+          <Accordion.Content active={accordions.includes(8)}>
+            <Grid style={{ marginBottom: '1px' }}>
+              {this.props.getObject('rentalEquipment').options.map(i =>
+                  (
+                    <Grid.Row>
+                      <Grid.Column width={4}>
+                        <Form.Checkbox label={i[lan]} id={i.key} checked={values[i.key]} onChange={this.props.handleOnChange} />
+                      </Grid.Column>
+                      <Grid.Column width={4} >
+                        {lan === 'fi' ? i.priceInfoFi : i.priceInfoEn}
+                      </Grid.Column>
+                    </Grid.Row>
+                ))}
+            </Grid>
           </Accordion.Content>
         </Accordion>
+
         <Accordion>
-          <Accordion.Title active={accordions.includes(1)} index={1} onClick={this.handleAccordionClick}>
-            <Header as="h4"><Icon name="dropdown" />{this.props.getObject('servicesTitle')[lan]}</Header>
+          <Accordion.Title active={accordions.includes(9)} index={9} onClick={this.handleAccordionClick}>
+            <Header as="h4"><Icon name="dropdown" />{this.props.getObject('extraServices')[lan]}</Header>
           </Accordion.Title>
-          <Accordion.Content active={accordions.includes(1)}>
+          <Accordion.Content active={accordions.includes(9)}>
             <Grid style={{ marginBottom: '1px' }}>
-              <Grid.Column width={5}>
+              <Grid.Column width={4}>
                 <Form.Checkbox label={this.props.getObject('linen')[lan]} id="linen" checked={values.linen} onChange={this.props.handleOnChange} />
                 <Form.Checkbox label={this.props.getObject('towels')[lan]} id="towels" checked={values.towels} onChange={this.props.handleOnChange} />
                 <Form.Checkbox label={this.props.getObject('hottub')[lan]} id="hottub" checked={values.hottub} onChange={this.props.handleOnChange} />
@@ -76,43 +171,7 @@ class Extras extends React.Component {
             </Grid>
           </Accordion.Content>
         </Accordion>
-        {/* {{ this.state.type === 'company' && this.state.visitType === 'meeting' &&
-          <p style={styles.categoryHeader} onClick={() => { this.setState({ showMeetingEquipment: !this.state.showMeetingEquipment }); }}>
-              {this.getObject('meetingEquipment')[lan]}
-            <Icon name="angle down" />
-          </p>
-            }
-          { this.state.showMeetingEquipment &&
-            <div style={styles.categoryItems}>
-              {this.getObject('meetingEquipment').options.map(i =>
-                <SemanticForm.Checkbox label={i[lan]} id={i.key} checked={this.state[i.key]} onChange={this.handleOnChange} />)}
-            </div>}
-          <Header as="h5">{this.getObject('foodOptions')[lan]}</Header>
-          <Accordion>
-            <Accordion.Title active={this.state.activeIndex === 0} index={0} onClick={this.handleAccordionClick}>
-              <Icon name="angle up" />
-          What is a dog?
-            </Accordion.Title>
-            <Accordion.Content active={this.state.activeIndex === 0}>
-              <p>
-            A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can
-            be found as a welcome guest in many households across the world.
-              </p>
-            </Accordion.Content>
-          </Accordion>
 
-
-          <Header as="h5">{this.getObject('activityTitle')[lan]}</Header>
-          <p style={styles.categoryHeader} onClick={() => { this.setState({ showRental: !this.state.showRental }); }}>{this.getObject('rentalTitle')[lan]} <Icon name="angle down" /></p>
-          {this.state.showRental &&
-            <div style={styles.categoryItems}>
-              {this.getObject('rentalTitle').options.map(i =>
-                <SemanticForm.Checkbox label={i[lan]} id={i.key} checked={this.state[i.key]} onChange={this.handleOnChange} />)}
-            </div>
-          }
-          { this.getObject('activityOptions').options.map(i =>
-            <SemanticForm.Checkbox label={i[lan]} id={i.key} checked={this.state[i.key]} onChange={this.handleOnChange} />)
-          } */}
       </React.Fragment>
     );
   }

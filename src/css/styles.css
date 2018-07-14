@@ -1,4 +1,7 @@
 
+body {
+  font-size: 13px !important;
+}
 
 .ui.selection.dropdown {
   min-height: 28px !important;
@@ -18,6 +21,10 @@
   margin: 1em 0 0 0 !important;
 }
 
+.ui.message {
+  padding: 0.7em !important;
+}
+
 .ui.accordion:not(.styled) .accordion .title~.content:not(.ui), .ui.accordion:not(.styled) .title~.content:not(.ui) {
   padding: 0.2em !important;
 }
@@ -31,12 +38,44 @@
   padding: 0.5em !important;
 }
 
+.ui.checkbox .box, .ui.checkbox label {
+  font-size: 13px !important;
+}
+
+.ui.grid {
+  margin: 0 !important;
+}
+
 .ui.grid>.row {
   padding: 0 !important;
 }
 
+.ui.grid>.column {
+  padding: 0 !important;
+}
+
+h4.ui.header {
+  font-size: 14px !important;
+}
+
+h5.ui.header {
+  font-size: 12.3px !important;
+}
+
+.ui.popup {
+  padding: 0.3em 0.5em !important;
+}
+
+.ui.form .disabled.field, .ui.form .disabled.fields .field, .ui.form .field :disabled {
+  opacity: 1 !important;
+}
+
+.ui.grid>.row >.column {
+  padding: 0 !important;
+}
+
 .ui.grid>.row:first-child {
-  padding: 0.3em 0 0 0 !important;
+  padding: 0 !important;
 }
 
 .ui.grid>.row:last-child {
