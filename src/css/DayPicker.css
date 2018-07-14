@@ -1,8 +1,30 @@
+.DayPicker:not(.DayPicker--interactionDisabled)
+.DayPicker-Day:not(.DayPicker-Day--disabled):not(.DayPicker-Day--selected):not(.DayPicker-Day--outside):hover {
+  background-color: #7dbc5e;
+  color: #fff;
+}
+
 /* DayPicker styles */
+.DayPicker-Day--selected:not(.DayPicker-Day--disabled):not(.DayPicker-Day--outside) {
+  position: relative;
+  color: #fff;
+  background-color: #7dbc5e;
+  border-radius: 100%;
+}
+
+.DayPicker-Day.DayPicker-Day--availableUntil12.DayPicker-Day--selected {
+  color: #fff;
+  background-color: #e5ad06;
+}
+
+.DayPicker-Day.DayPicker-Day--availableFrom16.DayPicker-Day--selected {
+  color: #fff;
+  background-color: #e5ad06;
+}
 
 .Selectable .DayPicker-Day--selected:not(.DayPicker-Day--start):not(.DayPicker-Day--end):not(.DayPicker-Day--outside) {
-  background-color: #cce7ff !important;
-  color: #4a90e2;
+  background-color: #d7ffc4 !important;
+  color: #555;
 }
 
 .Selectable .DayPicker-Day {
@@ -10,7 +32,17 @@
 }
 
 .Selectable .DayPicker-Day:not(.DayPicker-Day--disabled):not(.DayPicker-Day--outside):not(.DayPicker-Day--start):not(.DayPicker-Day--end) {
-  background-color: #c2e2b3;
+  background-color: #a8db90;
+  color: #555;
+}
+
+.DayPicker-Day.DayPicker-Day--availableUntil12:not(.DayPicker-Day--start):not(.DayPicker-Day--end) {
+  background-color: #ffc107 !important;
+  color: #555;
+}
+
+.DayPicker-Day.DayPicker-Day--availableFrom16:not(.DayPicker-Day--start):not(.DayPicker-Day--end) {
+  background-color: #ffc107 !important;
   color: #555;
 }
 
@@ -194,22 +226,10 @@
   color: #dce0e0;
 }
 
-.DayPicker-Day--selected:not(.DayPicker-Day--disabled):not(.DayPicker-Day--outside) {
-  position: relative;
-  color: #f0f8ff;
-  background-color: #4a90e2;
-  border-radius: 100%;
-}
-
-.DayPicker-Day--selected:not(.DayPicker-Day--disabled):not(.DayPicker-Day--outside):hover {
+/* .DayPicker-Day--selected:not(.DayPicker-Day--disabled):not(.DayPicker-Day--outside):hover {
   background-color: #51a0fa;
-}
+} */
 
-.DayPicker:not(.DayPicker--interactionDisabled)
-  .DayPicker-Day:not(.DayPicker-Day--disabled):not(.DayPicker-Day--selected):not(.DayPicker-Day--outside):hover {
-  background-color: #4a90e2;
-  color: #f0f8ff;
-}
 
 /* DayPickerInput */
 

@@ -21,14 +21,63 @@ class Form extends React.Component {
     errors: {},
     activeIndex: 0,
     disabledDays: [],
-    partyAvailableDays: [],
   };
 
   componentDidMount = () => {
     getCalendarEvents().then((response) => {
-      console.log(response.data.items);
-      // TODO: list items in disabled, partly available lists
+      this.formatDates(response.data.items);
     });
+  }
+
+  formatDates = (events) => {
+    // if end is before 12 --> availableFrom16
+    // if start is after 16 --> availableUntil12
+    const disabledDays = [];
+    const from16 = [];
+    const until12 = [];
+    events.forEach((event) => {
+      // each event has end and start object with either date or dateTime
+      if (event.start.date) {
+        const end = moment(event.end.date);
+        const date = moment(event.start.date);
+        while (date.format() !== end.format()) {
+          disabledDays.push(date.toDate());
+          date.add(1, 'days');
+        }
+      } else {
+        const start = moment(event.start.dateTime);
+        const date = moment(event.start.dateTime);
+        const end = moment(event.end.dateTime);
+        while (date.format('YYYY-MM-DD') !== end.format('YYYY-MM-DD')) {
+          //between dates are disabled
+          date.add(1, 'days');
+          disabledDays.push(date.toDate());
+        }
+        // event started before 16 oclock --> date is full
+        const fStart = new Date(start.format('YYYY-MM-DD'));
+        if (start.hour() < 15) {
+          disabledDays.push(fStart);
+        } else if (from16.includes(fStart)) {
+          disabledDays.push(fStart);
+          const index = from16.findIndex(d => d === fStart);
+          from16.splice(index, 1);
+        } else {
+          until12.push(fStart);
+        }
+
+        const fEnd = new Date(end.format('YYYY-MM-DD'));
+        if (end.hour() > 11) {
+          disabledDays.push(fEnd);
+        } else if (until12.includes(fEnd)) {
+          disabledDays.push(fEnd);
+          const index = until12.findIndex(d => d === fEnd);
+          until12.splice(index, 1);
+        } else {
+          from16.push(fEnd);
+        }
+      }
+    });
+    this.setState({ disabledDays, availableFrom16: from16, availableUntil12: until12 });
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -91,7 +140,7 @@ class Form extends React.Component {
     this.setState({ popupOpen: !this.state.popupOpen });
   }
 
-  handleDayClick = (day) => {
+  handleDayClick = (day, modifiers) => {
     let { to, from } = this.state;
     if (!from) {
       from = day;
@@ -117,7 +166,7 @@ class Form extends React.Component {
         arrivalTime = '16';
         departTime = '12';
       }
-      this.setState({ to, from, arrivalTime, departTime });
+      this.setState({ to, from, arrivalTime, departTime, until12Info: modifiers.availableUntil12, from16Info: modifiers.availableFrom16 });
     }
   }
 
@@ -163,11 +212,11 @@ class Form extends React.Component {
       const description = lan === 'en' && 'Asiakas on tehnyt tarjouspyynnön englanninkielisillä sivuilla.';
       const html = createHTML(this.createDataFields(), description);
       this.props.sendMail(this.state.email, html);
-      window.scrollTo(0, 0);
     } else {
       const e = lan === 'fi' ? 'Täytä pakolliset kentät!' : 'Please fill out all mandatory fields!';
       this.setState({ errors: { ...this.state.errors, mandatoryFields: e } });
     }
+    window.scrollTo(0, 0);
   }
 
   createDataFields = () => {
@@ -185,21 +234,21 @@ class Form extends React.Component {
       Hinta: `${this.calculatePrice()} €`,
     };
     const food = { title: 'Tarjoilut' };
-    this.getObject('foodOptions').options.forEach((ac) => {
-      food[this.getObjectInList('foodOptions', ac.key).fi] = data[ac.key] ? 'Kyllä' : undefined;
-    });
+    this.getObject('foodOptions').options.forEach((ac) => { (food[this.getObjectInList('foodOptions', ac.key).fi] = data[ac.key] ? 'Kyllä' : undefined); });
+
     const activities = { title: 'Aktiviteetit ja ohjelmat' };
-    this.getObject('activityOptions').options.forEach((ac) => {
-      if (data[ac.key]) {
-        activities[this.getObjectInList('activityOptions', ac.key).fi] = 'Kyllä';
-      }
-    });
-    this.getObject('rentalOptions').options.forEach((rental) => {
-      food[this.getObjectInList('rentalOptions', rental.key).fi] = data[rental.key] ? 'Kyllä' : undefined;
-    });
+    this.getObject('wellbeing').options.forEach((ac) => { (activities[this.getObjectInList('wellbeing', ac.key).fi] = data[ac.key] ? 'Kyllä' : undefined); });
+    this.getObject('water').options.forEach((ac) => { (activities[this.getObjectInList('water', ac.key).fi] = data[ac.key] ? 'Kyllä' : undefined); });
+    this.getObject('forest').options.forEach((ac) => { (activities[this.getObjectInList('forest', ac.key).fi] = data[ac.key] ? 'Kyllä' : undefined); });
+    this.getObject('otherPrograms').options.forEach((ac) => { (activities[this.getObjectInList('otherPrograms', ac.key).fi] = data[ac.key] ? 'Kyllä' : undefined); });
+    this.getObject('workplaceTraining').options.forEach((ac) => { (activities[this.getObjectInList('workplaceTraining', ac.key).fi] = data[ac.key] ? 'Kyllä' : undefined); });
+
+    this.getObject('rentalEquipment').options.forEach((rental) => { (activities[this.getObjectInList('rentalEquipment', rental.key).fi] = data[rental.key] ? 'Kyllä' : undefined); });
+
     const services = ['linen', 'towels', 'hottub'];
     const extraServices = { title: 'Lisäpalvelut' };
     services.forEach((s) => { extraServices[this.getObject(s).fi] = data[s] ? 'Kyllä' : undefined; });
+    this.getObject('meetingEquipment').options.forEach((ac) => { (extraServices[this.getObjectInList('meetingEquipment', ac.key).fi] = data[ac.key] ? 'Kyllä' : undefined); });
 
     const visitDetails = { title: 'Vierailun lisätiedot' };
     const details = ['companyName', 'visitType', 'visitTypeString', 'meetingType', 'locationType'];
@@ -256,7 +305,7 @@ class Form extends React.Component {
 
   render() {
     const { from, to } = this.state;
-    const modifiers = { start: from, end: to };
+    const modifiers = { start: from, end: to, availableUntil12: this.state.availableUntil12, availableFrom16: this.state.availableFrom16 };
     const dateValue = this.dateToStr(from, to);
     const timeOptions = this.getTimeOptions();
     return (
@@ -297,12 +346,18 @@ class Form extends React.Component {
                     onDayClick={this.handleDayClick}
                     modifiers={modifiers}
                     selectedDays={[from, { from, to }]}
-                    disabledDays={[{ before: new Date() }, new Date(2018, 6, 28)]}
+                    disabledDays={[{ before: new Date() }, ...this.state.disabledDays ]}
                   />
-                  <p>
-                    <Label style={{ backgroundColor: '#c2e2b3', margin: '0 12px 0 20px' }} size="large" circular empty />{lan === 'fi' ? 'Vapaa' : 'Available'}
-                    <Label style={{ backgroundColor: '#c2e2b3', margin: '0 12px 0 20px' }} size="large" circular empty />{lan === 'fi' ? 'Osittain vapaa' : 'Partly available'}
-                  </p>
+                  <div style={{ margin: '0 0 0 20px' }}>
+                    { this.state.until12Info &&
+                      <p> {lan === 'fi' ? 'Vapaa klo 12 asti' : 'Available until 12 (noon)'}</p>
+                    }
+                    { this.state.from16Info &&
+                      <p>{lan === 'fi' ? 'Vapaa klo 16 alkaen' : 'Available from 16 onwards'}</p>
+                    }
+                    <Label style={{ backgroundColor: '#c2e2b3', margin: '0 8px 0 0' }} size="large" circular empty />{lan === 'fi' ? 'Vapaa' : 'Available'}
+                    <Label style={{ backgroundColor: '#ffc107', margin: '0 8px' }} size="large" circular empty />{lan === 'fi' ? 'Osittain vapaa' : 'Partly available'}
+                  </div>
                 </React.Fragment>
                  }
             />

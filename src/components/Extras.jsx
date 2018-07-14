@@ -1,7 +1,5 @@
 import React from 'react';
-import { Header, Form, Divider, Icon, Grid, Accordion, Checkbox } from 'semantic-ui-react';
-import _ from 'lodash';
-import InfoPopup from './InfoPopup';
+import { Header, Form, Divider, Icon, Grid, Accordion } from 'semantic-ui-react';
 import CustomAccordion from './CustomAccordion';
 import { lan } from '../utils';
 

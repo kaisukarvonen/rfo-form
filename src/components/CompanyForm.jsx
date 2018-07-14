@@ -1,5 +1,5 @@
 import React from 'react';
-import { Header, Form, Grid, Checkbox, Icon } from 'semantic-ui-react';
+import { Header, Form, Grid, Checkbox } from 'semantic-ui-react';
 import InfoPopup from './InfoPopup';
 import { lan } from '../utils';
 

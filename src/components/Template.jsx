@@ -15,7 +15,7 @@ function createHTML(data, description) {
               (
                 key !== 'title' && data[innerObject][key] &&
                 <Item>
-                  <Span fontSize={13} style={{ display: 'inline-block', width: '200px' }}>
+                  <Span fontSize={13} style={{ display: 'inline-block', width: '400px' }}>
                     {`${key}`}
                   </Span>
                   <Span fontSize={13}>
