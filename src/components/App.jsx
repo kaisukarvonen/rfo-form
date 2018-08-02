@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { Loader, Dimmer } from 'semantic-ui-react';
-import _ from 'lodash';
 import * as fieldActions from '../dux/fields';
 import * as mailActions from '../dux/mail';
 import * as notificationActions from '../dux/notification';
@@ -46,7 +45,7 @@ class App extends React.Component {
           />
         </div>
         }
-        { !_.isEmpty(this.props.notification) &&
+        { Object.getOwnPropertyNames(this.props.notification).length > 0 &&
         <Notification
           notification={this.props.notification}
           hideNotification={this.props.hideNotification}

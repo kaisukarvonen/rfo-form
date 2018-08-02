@@ -1,6 +1,5 @@
 import React from 'react';
 import { Container, Header, Form as SemanticForm, Popup, Label, Message } from 'semantic-ui-react';
-import _ from 'lodash';
 import DayPicker from 'react-day-picker';
 import MomentLocaleUtils from 'react-day-picker/moment';
 import 'moment/locale/fi';
@@ -105,8 +104,8 @@ class Form extends React.Component {
     return options;
   }
 
-  getObject = key => _.find(this.props.fields, { key });
-  getObjectInList = (key, innerKey) => _.find(this.getObject(key).options, { key: innerKey });
+  getObject = key => this.props.fields.find(field => field.key === key);
+  getObjectInList = (key, innerKey) => this.getObject(key).options.find(option => option.key === innerKey);
 
 
   handleOnChange = (e, data) => {
