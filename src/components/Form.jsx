@@ -179,7 +179,7 @@ class Form extends React.Component {
     // alvPrice
     let priceField = this.state.type === 'company' ? 'price' : 'alvPrice';
     let price = 0;
-    const { linen, towels, hottub, meetingType, visitType } = this.state;
+    const { linen, towels, hottub, meetingType, visitType, to, from } = this.state;
     price = meetingType ? this.getObjectInList('meetingOptions', this.state.meetingType).price : 0;
     price += (linen ? this.getObject('linen')[priceField] * this.state.personAmount : 0) +
     (towels ? this.getObject('towels')[priceField] * this.state.personAmount : 0) +
@@ -187,8 +187,12 @@ class Form extends React.Component {
     this.getObject('rentalEquipment').options.forEach((option) => {
       price += this.state[option.key] ? option.alvPrice : 0;
     });
-    if (visitType !== 'meeting') {
-      // TODO: calculate days
+    if (!meetingType && (to || from)) {
+      let numOfNights = 1;
+      if (from && to) {
+        numOfNights = moment(to).diff(moment(from), 'days');
+      }
+      price += numOfNights < 2 ? this.getObject('acommodationPrices')['1'] : this.getObject('acommodationPrices')['1'] + ((numOfNights - 1) * this.getObject('acommodationPrices')['2']);
     }
     return price;
   }
@@ -281,11 +285,12 @@ class Form extends React.Component {
 
   dateToStr = (from, to) => {
     if (from && to) {
+      const diff = moment(to).diff(moment(from), 'days');
       if (this.state.type !== 'company') {
-        return moment(to).diff(moment(from), 'days') !== 0 ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}` :
-        `${moment(from).format('DD.MM.YYYY')} - ${moment(from).add(1, 'days').format('DD.MM.YYYY')}`;
+        return diff !== 0 ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}` :
+          `${moment(from).format('DD.MM.YYYY')} - ${moment(from).add(1, 'days').format('DD.MM.YYYY')}`;
       }
-      return moment(to).diff(moment(from), 'days') !== 0 ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}` : moment(from).format('DD.MM.YYYY');
+      return diff !== 0 ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}` : moment(from).format('DD.MM.YYYY');
     } else if (from && !to) {
       if (this.state.type !== 'company') {
         return `${moment(from).format('DD.MM.YYYY')} - ${moment(from).add(1, 'days').format('DD.MM.YYYY')}`;

@@ -213,6 +213,7 @@
 .DayPicker-Day--disabled {
   color: #dce0e0;
   cursor: default;
+  pointer-events: none;
   /* background-color: #eff1f1; */
 }
 
