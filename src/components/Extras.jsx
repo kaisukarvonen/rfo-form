@@ -18,19 +18,19 @@ class Extras extends React.Component {
       newArray.push(index);
     }
     this.setState({ accordions: newArray });
-  }
+  };
 
-  displayExtraServicePrice = (object) => {
+  displayExtraServicePrice = object => {
     const priceField = this.props.values.type === 'company' ? 'price' : 'alvPrice';
     const alvText = priceField === 'price' ? `+ ${lan === 'fi' ? 'alv' : 'vat'}` : '';
     return <p style={{ paddingTop: '2px' }}>{`${object[priceField]} € ${alvText}`}</p>;
-  }
+  };
 
-  displayCleaningPrice = (object) => {
-    const period = this.props.values.activePeriod;
-    return period === 'summer' ? `${object[period]} €` : `${object[period].villa} € + ${object[period].cottage} €/${lan === 'fi' ? 'huone mökissä' : 'cottage room'}`;
-  }
-
+  displayCleaningPrice = object => {
+    return `${lan === 'fi' ? 'kesällä' : 'in summer'} ${object.summer} €, ${lan === 'fi' ? 'talvella huvila' : 'in winter villa'} ${object.winter.villa} € + ${
+      object.winter.cottage
+    } €/${lan === 'fi' ? 'huone mökissä' : 'each cottage room'}`;
+  };
 
   render() {
     const styles = {
@@ -49,18 +49,18 @@ class Extras extends React.Component {
       <React.Fragment>
         <Divider />
 
-        { values.visitType === 'meeting' &&
-        <CustomAccordion
-          values={values}
-          accordions={accordions}
-          handleOnChange={this.props.handleOnChange}
-          handleAccordionClick={this.handleAccordionClick}
-          showInfo={this.props.showInfo}
-          getObject={this.props.getObject}
-          title="meetingEquipment"
-          index={1}
-        />
-      }
+        {values.visitType === 'meeting' && (
+          <CustomAccordion
+            values={values}
+            accordions={accordions}
+            handleOnChange={this.props.handleOnChange}
+            handleAccordionClick={this.handleAccordionClick}
+            showInfo={this.props.showInfo}
+            getObject={this.props.getObject}
+            title="meetingEquipment"
+            index={1}
+          />
+        )}
 
         <CustomAccordion
           values={values}
@@ -72,11 +72,14 @@ class Extras extends React.Component {
           title="foodOptions"
           index={2}
         />
-        { lan === 'fi' ? '* Huomioimme kaikki erityisruokavaliot' : '* We cater to all dietary needs '}
+        {lan === 'fi' ? '* Huomioimme kaikki erityisruokavaliot' : '* We cater to all dietary needs '}
 
         <Accordion>
           <Accordion.Title active={accordions.includes(3)} index={3} onClick={this.handleAccordionClick}>
-            <Header as="h4"><Icon name="dropdown" />{this.props.getObject('programs')[lan]}</Header>
+            <Header as="h4">
+              <Icon name="dropdown" />
+              {this.props.getObject('programs')[lan]}
+            </Header>
           </Accordion.Title>
           <Accordion.Content active={accordions.includes(3)}>
             <CustomAccordion
@@ -117,28 +120,31 @@ class Extras extends React.Component {
 
         <Accordion>
           <Accordion.Title active={accordions.includes(8)} index={8} onClick={this.handleAccordionClick}>
-            <Header as="h4"><Icon name="dropdown" />{this.props.getObject('rentalEquipment')[lan]}</Header>
+            <Header as="h4">
+              <Icon name="dropdown" />
+              {this.props.getObject('rentalEquipment')[lan]}
+            </Header>
           </Accordion.Title>
           <Accordion.Content active={accordions.includes(8)}>
             <Grid style={{ marginBottom: '1px' }}>
-              {this.props.getObject('rentalEquipment').options.map(i =>
-                  (
-                    <Grid.Row>
-                      <Grid.Column width={4}>
-                        <Form.Checkbox label={i[lan]} id={i.key} checked={values[i.key]} onChange={this.props.handleOnChange} />
-                      </Grid.Column>
-                      <Grid.Column width={4} >
-                        {lan === 'fi' ? i.priceInfoFi : i.priceInfoEn}
-                      </Grid.Column>
-                    </Grid.Row>
-                ))}
+              {this.props.getObject('rentalEquipment').options.map(i => (
+                <Grid.Row>
+                  <Grid.Column width={4}>
+                    <Form.Checkbox label={i[lan]} id={i.key} checked={values[i.key]} onChange={this.props.handleOnChange} />
+                  </Grid.Column>
+                  <Grid.Column width={4}>{lan === 'fi' ? i.priceInfoFi : i.priceInfoEn}</Grid.Column>
+                </Grid.Row>
+              ))}
             </Grid>
           </Accordion.Content>
         </Accordion>
 
         <Accordion>
           <Accordion.Title active={accordions.includes(9)} index={9} onClick={this.handleAccordionClick}>
-            <Header as="h4"><Icon name="dropdown" />{this.props.getObject('extraServices')[lan]}</Header>
+            <Header as="h4">
+              <Icon name="dropdown" />
+              {this.props.getObject('extraServices')[lan]}
+            </Header>
           </Accordion.Title>
           <Accordion.Content active={accordions.includes(9)}>
             <Grid style={{ marginBottom: '1px' }}>
@@ -146,22 +152,19 @@ class Extras extends React.Component {
                 <Form.Checkbox label={this.props.getObject('linen')[lan]} id="linen" checked={values.linen} onChange={this.props.handleOnChange} />
                 <Form.Checkbox label={this.props.getObject('towels')[lan]} id="towels" checked={values.towels} onChange={this.props.handleOnChange} />
                 <Form.Checkbox label={this.props.getObject('hottub')[lan]} id="hottub" checked={values.hottub} onChange={this.props.handleOnChange} />
-                { values.type === 'private' &&
+                {values.type === 'private' && (
                   <Form.Checkbox label={this.props.getObject('cleaning')[lan]} id="cleaning" checked={values.cleaning} onChange={this.props.handleOnChange} />
-                }
+                )}
               </Grid.Column>
               <Grid.Column width={5}>
                 {this.displayExtraServicePrice(this.props.getObject('linen'))}
                 {this.displayExtraServicePrice(this.props.getObject('towels'))}
                 {this.displayExtraServicePrice(this.props.getObject('hottub'))}
-                { values.type === 'private' &&
-                this.displayCleaningPrice(this.props.getObject('cleaning'))
-                }
+                {values.type === 'private' && this.displayCleaningPrice(this.props.getObject('cleaning'))}
               </Grid.Column>
             </Grid>
           </Accordion.Content>
         </Accordion>
-
       </React.Fragment>
     );
   }

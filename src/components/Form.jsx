@@ -20,7 +20,6 @@ class Form extends React.Component {
     errors: {},
     activeIndex: 0,
     disabledDays: [],
-    activePeriod: [9, 10, 11, 0, 1, 2, 3].includes(moment().month()) ? 'winter' : 'summer',
     specialDates: [{ date: 24, month: 12 }, { date: 31, month: 12 }],
     moreInformation: '',
   };
@@ -189,7 +188,6 @@ class Form extends React.Component {
     const priceField = this.state.type === 'company' ? 'price' : 'alvPrice';
     let price = 0;
     const { linen, towels, hottub, meetingType, to, from, type, cottages, cleaning, specialDates } = this.state;
-    let { activePeriod } = this.state;
 
     price = meetingType ? this.getObjectInList('meetingOptions', this.state.meetingType).price : 0;
     price +=
@@ -199,11 +197,13 @@ class Form extends React.Component {
     this.getObject('rentalEquipment').options.forEach(option => {
       price += this.state[option.key] ? option.alvPrice : 0;
     });
+    let activePeriod = '';
     if (type !== 'company' && (to || from)) {
       let numOfNights = 1;
       if (from && to) {
         numOfNights = moment(to).diff(moment(from), 'days');
       }
+      activePeriod = [9, 10, 11, 0, 1, 2, 3].includes(from.getMonth()) ? 'winter' : 'summer';
       const strFrom = { date: from.getDate(), month: from.getMonth() + 1 };
       specialDates.forEach(date => {
         if (JSON.stringify(date) === JSON.stringify(strFrom)) {
@@ -480,9 +480,14 @@ class Form extends React.Component {
             </SemanticForm.Group>
           )}
           {this.state.type === 'private' && (
-            <Message>
-              <Message.Content>{this.getObject('acommodationInfo')[this.state.activePeriod][lan]}</Message.Content>
-            </Message>
+            <React.Fragment>
+              <Message>
+                <Message.Content>{this.getObject('acommodationInfo').winter[lan]}</Message.Content>
+              </Message>
+              <Message>
+                <Message.Content>{this.getObject('acommodationInfo').summer[lan]}</Message.Content>
+              </Message>
+            </React.Fragment>
           )}
           {this.state.type && (
             <Message style={{ backgroundColor: '#f9f0d1' }}>
