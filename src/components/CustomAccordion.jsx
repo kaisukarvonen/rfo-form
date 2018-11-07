@@ -12,10 +12,13 @@ const CustomAccordion = (props) => {
       </Accordion.Title>
       <Accordion.Content active={accordions.includes(index)}>
         {props.getObject(title).options.map(i => (
-          <Form.Field inline>
-            <Checkbox label={i[lan]} id={i.key} checked={values[i.key]} onChange={props.handleOnChange} />
-            { props.showInfo(i) && <InfoPopup icon="info circle" content={props.showInfo(i)} /> }
-          </Form.Field>
+          <React.Fragment>
+            <Form.Field inline>
+              <Checkbox label={i[lan]} id={i.key} checked={values[i.key]} onChange={props.handleOnChange} />
+              { props.showInfo(i) && <InfoPopup icon="info circle" content={props.showInfo(i)} /> }
+            </Form.Field>
+            {i.spaceAfter && <br/>}
+          </React.Fragment>
             ))}
       </Accordion.Content>
     </Accordion>

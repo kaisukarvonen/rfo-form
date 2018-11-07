@@ -5,7 +5,7 @@ import { lan } from '../utils';
 
 class Extras extends React.Component {
   state = {
-    accordions: [],
+    accordions: [9],
   };
 
   handleAccordionClick = (e, titleProps) => {
@@ -23,7 +23,12 @@ class Extras extends React.Component {
   displayExtraServicePrice = (object) => {
     const priceField = this.props.values.type === 'company' ? 'price' : 'alvPrice';
     const alvText = priceField === 'price' ? `+ ${lan === 'fi' ? 'alv' : 'vat'}` : '';
-    return <p>{`${object[priceField]} € ${alvText}`}</p>;
+    return <p style={{ paddingTop: '2px' }}>{`${object[priceField]} € ${alvText}`}</p>;
+  }
+
+  displayCleaningPrice = (object) => {
+    const period = this.props.values.activePeriod;
+    return period === 'summer' ? `${object[period]} €` : `${object[period].villa} € + ${object[period].cottage} €/${lan === 'fi' ? 'huone mökissä' : 'cottage room'}`;
   }
 
 
@@ -69,65 +74,46 @@ class Extras extends React.Component {
         />
         { lan === 'fi' ? '* Huomioimme kaikki erityisruokavaliot' : '* We cater to all dietary needs '}
 
-        <Header as="h4" dividing>{this.props.getObject('programs')[lan]}</Header>
-        <CustomAccordion
-          small
-          values={values}
-          accordions={accordions}
-          handleOnChange={this.props.handleOnChange}
-          handleAccordionClick={this.handleAccordionClick}
-          showInfo={this.props.showInfo}
-          getObject={this.props.getObject}
-          title="wellbeing"
-          index={3}
-        />
-        <CustomAccordion
-          small
-          values={values}
-          accordions={accordions}
-          handleOnChange={this.props.handleOnChange}
-          handleAccordionClick={this.handleAccordionClick}
-          showInfo={this.props.showInfo}
-          getObject={this.props.getObject}
-          title="water"
-          index={4}
-        />
-        <CustomAccordion
-          small
-          values={values}
-          accordions={accordions}
-          handleOnChange={this.props.handleOnChange}
-          handleAccordionClick={this.handleAccordionClick}
-          showInfo={this.props.showInfo}
-          getObject={this.props.getObject}
-          title="forest"
-          index={5}
-        />
-        <CustomAccordion
-          small
-          values={values}
-          accordions={accordions}
-          handleOnChange={this.props.handleOnChange}
-          handleAccordionClick={this.handleAccordionClick}
-          showInfo={this.props.showInfo}
-          getObject={this.props.getObject}
-          title="otherPrograms"
-          index={6}
-        />
-        <CustomAccordion
-          small
-          values={values}
-          accordions={accordions}
-          handleOnChange={this.props.handleOnChange}
-          handleAccordionClick={this.handleAccordionClick}
-          showInfo={this.props.showInfo}
-          getObject={this.props.getObject}
-          title="workplaceTraining"
-          index={7}
-        />
-
-        <Divider />
-
+        <Accordion>
+          <Accordion.Title active={accordions.includes(3)} index={3} onClick={this.handleAccordionClick}>
+            <Header as="h4"><Icon name="dropdown" />{this.props.getObject('programs')[lan]}</Header>
+          </Accordion.Title>
+          <Accordion.Content active={accordions.includes(3)}>
+            <CustomAccordion
+              small
+              values={values}
+              accordions={accordions}
+              handleOnChange={this.props.handleOnChange}
+              handleAccordionClick={this.handleAccordionClick}
+              showInfo={this.props.showInfo}
+              getObject={this.props.getObject}
+              title="allYearRound"
+              index={3}
+            />
+            <CustomAccordion
+              small
+              values={values}
+              accordions={accordions}
+              handleOnChange={this.props.handleOnChange}
+              handleAccordionClick={this.handleAccordionClick}
+              showInfo={this.props.showInfo}
+              getObject={this.props.getObject}
+              title="summer"
+              index={3}
+            />
+            <CustomAccordion
+              small
+              values={values}
+              accordions={accordions}
+              handleOnChange={this.props.handleOnChange}
+              handleAccordionClick={this.handleAccordionClick}
+              showInfo={this.props.showInfo}
+              getObject={this.props.getObject}
+              title="winter"
+              index={3}
+            />
+          </Accordion.Content>
+        </Accordion>
 
         <Accordion>
           <Accordion.Title active={accordions.includes(8)} index={8} onClick={this.handleAccordionClick}>
@@ -160,11 +146,17 @@ class Extras extends React.Component {
                 <Form.Checkbox label={this.props.getObject('linen')[lan]} id="linen" checked={values.linen} onChange={this.props.handleOnChange} />
                 <Form.Checkbox label={this.props.getObject('towels')[lan]} id="towels" checked={values.towels} onChange={this.props.handleOnChange} />
                 <Form.Checkbox label={this.props.getObject('hottub')[lan]} id="hottub" checked={values.hottub} onChange={this.props.handleOnChange} />
+                { values.type === 'private' &&
+                  <Form.Checkbox label={this.props.getObject('cleaning')[lan]} id="cleaning" checked={values.cleaning} onChange={this.props.handleOnChange} />
+                }
               </Grid.Column>
-              <Grid.Column width={3}>
+              <Grid.Column width={5}>
                 {this.displayExtraServicePrice(this.props.getObject('linen'))}
                 {this.displayExtraServicePrice(this.props.getObject('towels'))}
                 {this.displayExtraServicePrice(this.props.getObject('hottub'))}
+                { values.type === 'private' &&
+                this.displayCleaningPrice(this.props.getObject('cleaning'))
+                }
               </Grid.Column>
             </Grid>
           </Accordion.Content>

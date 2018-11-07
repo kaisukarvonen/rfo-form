@@ -9,7 +9,6 @@ import * as notificationActions from '../dux/notification';
 import '../css/styles.css';
 import '../css/DayPicker.css';
 import { lan } from '../utils';
-
 import ErrorBoundary from './ErrorBoundary';
 import Notification from './Notification';
 import Form from './Form';
@@ -28,29 +27,20 @@ class App extends React.Component {
 
   componentDidMount = () => {
     this.props.fetchFields();
-  }
-
+  };
 
   render() {
     return (
       <ErrorBoundary>
-        { this.props.fields.length > 0 &&
-        <div>
-          <Dimmer active={this.props.sendingEmail} inverted>
-            <Loader inverted>{lan === 'fi' ? 'Viestiäsi lähetetään ...' : 'Your message is being sent ...'}</Loader>
-          </Dimmer>
-          <Form
-            fields={this.props.fields}
-            sendMail={this.props.sendMail}
-          />
-        </div>
-        }
-        { Object.getOwnPropertyNames(this.props.notification).length > 0 &&
-        <Notification
-          notification={this.props.notification}
-          hideNotification={this.props.hideNotification}
-        />
-      }
+        {this.props.fields.length > 0 && (
+          <div>
+            <Dimmer active={this.props.sendingEmail} inverted>
+              <Loader inverted>{lan === 'fi' ? 'Viestiäsi lähetetään ...' : 'Your message is being sent ...'}</Loader>
+            </Dimmer>
+            <Form fields={this.props.fields} sendMail={this.props.sendMail} />
+          </div>
+        )}
+        {Object.getOwnPropertyNames(this.props.notification).length > 0 && <Notification notification={this.props.notification} hideNotification={this.props.hideNotification} />}
       </ErrorBoundary>
     );
   }
@@ -64,9 +54,13 @@ export default connect(
     notification: state.notification.notification,
     sendingEmail: state.mail.sendingEmail,
   }),
-  dispatch => (bindActionCreators({
-    ...fieldActions,
-    ...mailActions,
-    ...notificationActions,
-  }, dispatch)),
+  dispatch =>
+    bindActionCreators(
+      {
+        ...fieldActions,
+        ...mailActions,
+        ...notificationActions,
+      },
+      dispatch
+    )
 )(App);

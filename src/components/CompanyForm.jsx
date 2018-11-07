@@ -6,18 +6,6 @@ import { lan } from '../utils';
 class CompanyForm extends React.Component {
   state = { };
 
-  displayLimits = (object) => {
-    let limit = '';
-    if (object.max && !object.min) {
-      limit = lan === 'fi' ? ` (alle ${object.max} hlöä)` : ` (max ${object.max} people)`;
-    } else if (object.min && !object.max) {
-      limit = lan === 'fi' ? ` (yli ${object.min} hlöä)` : ` (min ${object.min} people)`;
-    } else {
-      limit = lan === 'fi' ? ` (${object.min} - ${object.max} hlöä)` : ` (${object.min} - ${object.max} people)`;
-    }
-    return object[lan] + limit;
-  }
-
 
   render() {
     const { values } = this.props;
@@ -57,8 +45,7 @@ class CompanyForm extends React.Component {
         { (values.visitType || values.visitTypeString.length > 0) &&
           <React.Fragment>
             <Header as="h4">{this.props.getObject('locationTitle')[lan]}</Header>
-            <Form.Radio label={this.displayLimits(this.props.getObject('villaParatiisi'))} value="villaParatiisi" checked={values.locationType === 'villaParatiisi'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} />
-            {/* <Form.Radio label={this.displayLimits(this.props.getObject('pohjoinenPortti'))} value="pohjoinenPortti" checked={values.locationType === 'pohjoinenPortti'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} /> */}
+            <Form.Radio label={`${this.props.getObject('villaParatiisi')[lan]} (max. 20-25 ${lan === 'fi' ? 'hlöä' : 'persons'})`} value="villaParatiisi" checked={values.locationType === 'villaParatiisi'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} />
             { values.visitType !== 'meeting' &&
             <React.Fragment>
               <Form.Radio label={this.props.getObject('ilmanTiloja')[lan]} value="ilmanTiloja" checked={values.locationType === 'ilmanTiloja'} onChange={(e, data) => this.props.handleOnRadioChange(e, data, 'locationType')} />
