@@ -382,197 +382,212 @@ class Form extends React.Component {
     const dateValue = this.dateToStr(from, to);
     const timeOptions = this.getTimeOptions();
     return (
-      <Container style={{ margin: '20px' }}>
-        <SemanticForm style={{ maxWidth: '900px' }} noValidate="novalidate">
-          <Header as="h4" dividing>
-            {this.getObject('contactDetails')[lan]}
-          </Header>
-          <SemanticForm.Group widths="equal">
-            <SemanticForm.Input required label={this.getObject('name')[lan]} id="name" onChange={this.handleOnChange} />
-            <SemanticForm.Input required label={this.getObject('email')[lan]} id="email" onChange={this.handleOnChange} />
-          </SemanticForm.Group>
-          <SemanticForm.Group widths="equal">
-            <SemanticForm.Input label={this.getObject('phone')[lan]} id="phone" onChange={this.handleOnChange} />
-            <SemanticForm.Input label={this.getObject('address')[lan]} id="address" onChange={this.handleOnChange} />
-          </SemanticForm.Group>
-          {this.state.type && (
-            <SemanticForm.Group>
-              <Popup
-                flowing
-                on="click"
-                position="top left"
-                open={this.state.open}
-                onClose={this.toggleDatePicker}
-                onOpen={this.toggleDatePicker}
-                trigger={
-                  <SemanticForm.Input required width={5} label={this.getObject('dates')[lan]} icon="calendar alternate outline" id="dates" value={dateValue} />
-                }
-                content={
-                  <React.Fragment>
-                    <DayPicker
-                      localeUtils={MomentLocaleUtils}
-                      locale={lan}
-                      numberOfMonths={2}
-                      fromMonth={new Date()}
-                      className="Selectable"
-                      onDayClick={this.handleDayClick}
-                      modifiers={modifiers}
-                      selectedDays={[from, { from, to }]}
-                      disabledDays={[{ before: new Date() }, ...this.state.disabledDays]}
+      <React.Fragment>
+        <div className="site-header">
+          <h3 className="header-title">Tarjouspyyntö - Nuuksion Taika</h3>
+          <p>
+            <a href="https://www.nuuksiontaika.fi/">Takaisin Nuuksion Taian sivuille</a>
+          </p>
+        </div>
+        <Container style={{ marginTop: '20px' }}>
+          <SemanticForm style={{ margin: '0 5%' }} noValidate="novalidate">
+            <Header as="h4" dividing>
+              {this.getObject('contactDetails')[lan]}
+            </Header>
+            <SemanticForm.Group widths="equal">
+              <SemanticForm.Input required label={this.getObject('name')[lan]} id="name" onChange={this.handleOnChange} />
+              <SemanticForm.Input required label={this.getObject('email')[lan]} id="email" onChange={this.handleOnChange} />
+            </SemanticForm.Group>
+            <SemanticForm.Group widths="equal">
+              <SemanticForm.Input label={this.getObject('phone')[lan]} id="phone" onChange={this.handleOnChange} />
+              <SemanticForm.Input label={this.getObject('address')[lan]} id="address" onChange={this.handleOnChange} />
+            </SemanticForm.Group>
+            {this.state.type && (
+              <SemanticForm.Group>
+                <Popup
+                  flowing
+                  on="click"
+                  position="top left"
+                  open={this.state.open}
+                  onClose={this.toggleDatePicker}
+                  onOpen={this.toggleDatePicker}
+                  trigger={
+                    <SemanticForm.Input
+                      required
+                      width={5}
+                      label={this.getObject('dates')[lan]}
+                      icon="calendar alternate outline"
+                      id="dates"
+                      value={dateValue}
                     />
-                    <div style={{ margin: '0 0 0 20px' }}>
-                      {this.state.until12Info && <p> {lan === 'fi' ? 'Vapaa klo 12 asti' : 'Available until 12 (noon)'}</p>}
-                      {this.state.from16Info && <p>{lan === 'fi' ? 'Vapaa klo 16 alkaen' : 'Available from 16 onwards'}</p>}
-                      <Label
-                        style={{
-                          backgroundColor: '#c2e2b3',
-                          margin: '0 8px 0 0',
-                        }}
-                        size="large"
-                        circular
-                        empty
+                  }
+                  content={
+                    <React.Fragment>
+                      <DayPicker
+                        localeUtils={MomentLocaleUtils}
+                        locale={lan}
+                        numberOfMonths={2}
+                        fromMonth={new Date()}
+                        className="Selectable"
+                        onDayClick={this.handleDayClick}
+                        modifiers={modifiers}
+                        selectedDays={[from, { from, to }]}
+                        disabledDays={[{ before: new Date() }, ...this.state.disabledDays]}
                       />
-                      {lan === 'fi' ? 'Vapaa' : 'Available'}
-                      <Label style={{ backgroundColor: '#ffc107', margin: '0 8px' }} size="large" circular empty />
-                      {lan === 'fi' ? 'Osittain vapaa' : 'Partly available'}
-                    </div>
-                  </React.Fragment>
-                }
+                      <div style={{ margin: '0 0 0 20px' }}>
+                        {this.state.until12Info && <p> {lan === 'fi' ? 'Vapaa klo 12 asti' : 'Available until 12 (noon)'}</p>}
+                        {this.state.from16Info && <p>{lan === 'fi' ? 'Vapaa klo 16 alkaen' : 'Available from 16 onwards'}</p>}
+                        <Label
+                          style={{
+                            backgroundColor: '#c2e2b3',
+                            margin: '0 8px 0 0',
+                          }}
+                          size="large"
+                          circular
+                          empty
+                        />
+                        {lan === 'fi' ? 'Vapaa' : 'Available'}
+                        <Label style={{ backgroundColor: '#ffc107', margin: '0 8px' }} size="large" circular empty />
+                        {lan === 'fi' ? 'Osittain vapaa' : 'Partly available'}
+                      </div>
+                    </React.Fragment>
+                  }
+                />
+                <SemanticForm.Select
+                  label={this.getObject('arrivalTime')[lan]}
+                  width={4}
+                  compact
+                  required
+                  style={{
+                    pointerEvents: this.state.type === 'company' ? 'auto' : 'none',
+                  }}
+                  placeholder="hh:mm"
+                  options={timeOptions}
+                  value={this.state.arrivalTime}
+                  id="arrivalTime"
+                  onChange={this.handleOnChange}
+                />
+                <SemanticForm.Select
+                  label={this.getObject('departTime')[lan]}
+                  width={4}
+                  compact
+                  required
+                  style={{
+                    pointerEvents: this.state.type === 'company' ? 'auto' : 'none',
+                  }}
+                  placeholder="hh:mm"
+                  options={timeOptions}
+                  value={this.state.departTime}
+                  id="departTime"
+                  onChange={this.handleOnChange}
+                />
+                <SemanticForm.Input
+                  type="number"
+                  label={this.getObject('personAmount')[lan]}
+                  width={3}
+                  min="1"
+                  required
+                  id="personAmount"
+                  value={this.state.personAmount}
+                  onChange={this.handleOnChange}
+                />
+              </SemanticForm.Group>
+            )}
+            {this.state.type === 'private' && (
+              <React.Fragment>
+                <Message>
+                  <Message.Content>{this.getObject('acommodationInfo').winter[lan]}</Message.Content>
+                </Message>
+                <Message>
+                  <Message.Content>{this.getObject('acommodationInfo').summer[lan]}</Message.Content>
+                </Message>
+              </React.Fragment>
+            )}
+            {this.state.type && (
+              <Message style={{ backgroundColor: '#f9f0d1' }}>
+                <Message.Content>{this.getObject('largeGroupInfo')[lan]}</Message.Content>
+              </Message>
+            )}
+            <Header as="h4">
+              {this.getObject('clientTypeTitle')[lan]} <sup style={{ color: '#db2828', fontSize: '14px' }}>*</sup>
+            </Header>
+            <SemanticForm.Group inline>
+              <SemanticForm.Radio
+                style={{ paddingRight: '26px' }}
+                label={this.getObject('company')[lan]}
+                value="company"
+                checked={this.state.type === 'company'}
+                onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')}
               />
-              <SemanticForm.Select
-                label={this.getObject('arrivalTime')[lan]}
-                width={4}
-                compact
-                required
-                style={{
-                  pointerEvents: this.state.type === 'company' ? 'auto' : 'none',
-                }}
-                placeholder="hh:mm"
-                options={timeOptions}
-                value={this.state.arrivalTime}
-                id="arrivalTime"
-                onChange={this.handleOnChange}
-              />
-              <SemanticForm.Select
-                label={this.getObject('departTime')[lan]}
-                width={4}
-                compact
-                required
-                style={{
-                  pointerEvents: this.state.type === 'company' ? 'auto' : 'none',
-                }}
-                placeholder="hh:mm"
-                options={timeOptions}
-                value={this.state.departTime}
-                id="departTime"
-                onChange={this.handleOnChange}
-              />
-              <SemanticForm.Input
-                type="number"
-                label={this.getObject('personAmount')[lan]}
-                width={3}
-                min="1"
-                required
-                id="personAmount"
-                value={this.state.personAmount}
-                onChange={this.handleOnChange}
+              <SemanticForm.Radio
+                label={this.getObject('private')[lan]}
+                value="private"
+                checked={this.state.type === 'private'}
+                onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')}
               />
             </SemanticForm.Group>
-          )}
-          {this.state.type === 'private' && (
-            <React.Fragment>
-              <Message>
-                <Message.Content>{this.getObject('acommodationInfo').winter[lan]}</Message.Content>
-              </Message>
-              <Message>
-                <Message.Content>{this.getObject('acommodationInfo').summer[lan]}</Message.Content>
-              </Message>
-            </React.Fragment>
-          )}
-          {this.state.type && (
-            <Message style={{ backgroundColor: '#f9f0d1' }}>
-              <Message.Content>{this.getObject('largeGroupInfo')[lan]}</Message.Content>
-            </Message>
-          )}
-          <Header as="h4">
-            {this.getObject('clientTypeTitle')[lan]} <sup style={{ color: '#db2828', fontSize: '14px' }}>*</sup>
-          </Header>
-          <SemanticForm.Group inline>
-            <SemanticForm.Radio
-              style={{ paddingRight: '26px' }}
-              label={this.getObject('company')[lan]}
-              value="company"
-              checked={this.state.type === 'company'}
-              onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')}
-            />
-            <SemanticForm.Radio
-              label={this.getObject('private')[lan]}
-              value="private"
-              checked={this.state.type === 'private'}
-              onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')}
-            />
-          </SemanticForm.Group>
 
-          {this.state.errors.mandatoryFields && (
-            <Message negative>
-              <Message.Content>{this.state.errors.mandatoryFields}</Message.Content>
-            </Message>
-          )}
-          {this.state.type === 'company' && (
-            <CompanyForm
-              getObject={this.getObject}
-              handleOnChange={this.handleOnChange}
-              handleOnRadioChange={this.handleOnRadioChange}
-              values={this.state}
-              showInfo={this.showInfo}
-            />
-          )}
-          {this.state.type === 'private' && (
-            <PrivatePersonForm
-              getObject={this.getObject}
-              handleOnChange={this.handleOnChange}
-              handleOnRadioChange={this.handleOnRadioChange}
-              values={this.state}
-              handleCottageChange={this.handleCottageChange}
-            />
-          )}
-          {this.state.type && <Extras getObject={this.getObject} showInfo={this.showInfo} values={this.state} handleOnChange={this.handleOnChange} />}
+            {this.state.errors.mandatoryFields && (
+              <Message negative>
+                <Message.Content>{this.state.errors.mandatoryFields}</Message.Content>
+              </Message>
+            )}
+            {this.state.type === 'company' && (
+              <CompanyForm
+                getObject={this.getObject}
+                handleOnChange={this.handleOnChange}
+                handleOnRadioChange={this.handleOnRadioChange}
+                values={this.state}
+                showInfo={this.showInfo}
+              />
+            )}
+            {this.state.type === 'private' && (
+              <PrivatePersonForm
+                getObject={this.getObject}
+                handleOnChange={this.handleOnChange}
+                handleOnRadioChange={this.handleOnRadioChange}
+                values={this.state}
+                handleCottageChange={this.handleCottageChange}
+              />
+            )}
+            {this.state.type && <Extras getObject={this.getObject} showInfo={this.showInfo} values={this.state} handleOnChange={this.handleOnChange} />}
 
-          <SemanticForm>
-            <SemanticForm.TextArea
-              rows={3}
-              autoHeight
-              label={lan === 'fi' ? 'Lisätietoja tarjouspyyntöön' : 'More information'}
-              value={this.moreInformation}
-              id="moreInformation"
-              onChange={this.handleOnChange}
-            />
+            <SemanticForm>
+              <SemanticForm.TextArea
+                rows={3}
+                autoHeight
+                label={lan === 'fi' ? 'Lisätietoja tarjouspyyntöön' : 'More information'}
+                value={this.moreInformation}
+                id="moreInformation"
+                onChange={this.handleOnChange}
+              />
+            </SemanticForm>
+
+            <Header as="h4" dividing>
+              {this.getObject('priceTitle')[lan]}
+            </Header>
+            {lan === 'fi' ? (
+              <p>
+                {`Alustava hinta sisältäen valitut palvelut: ${this.calculatePrice()} €`}
+                <br />
+                Tarjoilujen ja lisäpalveluiden hinnat määräytyvät saatavuuden mukaan. Pidätämme oikeuden muutoksiin.
+              </p>
+            ) : (
+              <p>
+                {`Price including chosen services: ${this.calculatePrice()} €`}
+                <br />
+                Food and other extra service prices depend on availability. We reserve the right to changes.
+              </p>
+            )}
+            {this.state.type && (
+              <Message>
+                <Message.Content>{this.getObject('paymentInfo')[this.state.type][lan]}</Message.Content>
+              </Message>
+            )}
+            <SemanticForm.Button primary content={lan === 'fi' ? 'Lähetä' : 'Send'} onClick={this.sendMail} />
           </SemanticForm>
-
-          <Header as="h4" dividing>
-            {this.getObject('priceTitle')[lan]}
-          </Header>
-          {lan === 'fi' ? (
-            <p>
-              {`Alustava hinta sisältäen valitut palvelut: ${this.calculatePrice()} €`}
-              <br />
-              Tarjoilujen ja lisäpalveluiden hinnat määräytyvät saatavuuden mukaan. Pidätämme oikeuden muutoksiin.
-            </p>
-          ) : (
-            <p>
-              {`Price including chosen services: ${this.calculatePrice()} €`}
-              <br />
-              Food and other extra service prices depend on availability. We reserve the right to changes.
-            </p>
-          )}
-          {this.state.type && (
-            <Message>
-              <Message.Content>{this.getObject('paymentInfo')[this.state.type][lan]}</Message.Content>
-            </Message>
-          )}
-          <SemanticForm.Button primary content={lan === 'fi' ? 'Lähetä' : 'Send'} onClick={this.sendMail} />
-        </SemanticForm>
-      </Container>
+        </Container>
+      </React.Fragment>
     );
   }
 }
