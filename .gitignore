@@ -1,0 +1,7 @@
+dump/
+mongo/
+mongo-data/
+.env
+.vscode
+.client
+npm-debug.log
