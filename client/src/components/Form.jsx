@@ -210,9 +210,7 @@ class Form extends React.Component {
       const title = `Tarjouspyyntö ${strDates}`;
       let description = `Tarjouspyyntö ajalle ${strDates} henkilöltä ${this.state.name} `;
       const html = createHTML(this.createDataFields(), title, description, this.state.moreInformation);
-      console.log(html);
-
-      // this.props.sendMail(this.state.email, title, html);
+      this.props.sendMail(this.state.email, title, html);
     } else {
       this.setState({
         errors: {
@@ -352,8 +350,6 @@ class Form extends React.Component {
         </span>
       );
     }
-    console.log(info);
-
     return info;
   };
 
