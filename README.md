@@ -1,3 +1,3 @@
 # rfo-form
 
-npm install && npm start
+docker-compose up -d
