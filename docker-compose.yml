@@ -1,0 +1,41 @@
+version: "3"
+services:
+  rfo-form-backend:
+    container_name: rfo-form-backend
+    build: ./server/
+    volumes:
+      - ./server:/usr/src/
+      - /usr/src/node_modules
+    environment:
+      - MONGO_URL=mongodb://${MONGO_BASIC_USERNAME}:${MONGO_BASIC_PASSWORD}@mongodb/rfo-form?authSource=rfo-form
+      - ORIGIN=${ORIGIN}
+      - EMAIL_SENDER=${EMAIL_SENDER}
+      - EMAIL_SENDER_PW=${EMAIL_SENDER_PW}
+      - EMAIL_TO=${EMAIL_TO}
+    ports:
+      - "3001:3001"
+    links:
+      - mongodb
+
+  rfo-form-client:
+    container_name: rfo-form-client
+    build: ./client/
+    volumes:
+      - ./client:/usr/src/
+      - /usr/src/node_modules
+    ports:
+      - "7676:3000"
+  mongodb:
+    container_name: rfo-form-mongodb
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+      - MONGO_BASIC_USERNAME=${MONGO_BASIC_USERNAME}
+      - MONGO_BASIC_PASSWORD=${MONGO_BASIC_PASSWORD}
+    volumes:
+      - ./mongo-data:/data/db
+      - ./dump:/dump
+      - ./mongo:/docker-entrypoint-initdb.d/
