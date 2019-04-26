@@ -1,0 +1,15 @@
+{
+  "extends": ["react-app", "airbnb", "prettier"],
+  "plugins": ["prettier"],
+  "globals": {
+    "document": true,
+    "window": true
+  },
+  "rules": {
+    "jsx-a11y/href-no-hash": "off",
+    "no-underscore-dangle": "off",
+    "react/forbid-prop-types": 0,
+    "max-len": "off",
+    "react/sort-comp": "off"
+  }
+}

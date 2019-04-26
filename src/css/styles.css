@@ -1,0 +1,136 @@
+body {
+  font-size: 13px !important;
+}
+
+.site-header a {
+  color: #fff;
+}
+
+.site-header {
+  width: 100%;
+  margin: 0;
+  background-color: #172c49;
+  display: flex;
+  flex: 1;
+  justify-content: space-around;
+  align-items: baseline;
+  padding-top: 1.3rem;
+  flex-wrap: wrap;
+}
+
+.header-title {
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.ui.selection.dropdown {
+  min-height: 28px !important;
+  padding: 0.5em !important;
+}
+
+.ui.page.modals.transition.visible {
+  display: flex !important;
+}
+
+.ui.selection.dropdown .menu > .item {
+  padding: 0.5em !important;
+}
+
+.ui.accordion .accordion .title,
+.ui.accordion .title {
+  padding: 0 !important;
+  margin: 1em 0 0 0 !important;
+}
+
+.ui.message {
+  padding: 0.7em !important;
+}
+
+.ui.accordion:not(.styled) .accordion .title ~ .content:not(.ui),
+.ui.accordion:not(.styled) .title ~ .content:not(.ui) {
+  padding: 0.2em !important;
+}
+
+.ui.selection.dropdown > .delete.icon,
+.ui.selection.dropdown > .dropdown.icon,
+.ui.selection.dropdown > .search.icon {
+  padding: 0.5em !important;
+}
+
+.ui.search.selection.dropdown > input.search {
+  min-height: 28px !important;
+  padding: 0.5em !important;
+}
+
+.ui.checkbox .box,
+.ui.checkbox label {
+  font-size: 13px !important;
+}
+
+.ui.grid {
+  margin: 0 !important;
+}
+
+.ui.grid > .row {
+  padding: 0 !important;
+}
+
+.ui.grid > .column {
+  padding: 0 !important;
+}
+
+h4.ui.header {
+  font-size: 14px !important;
+}
+
+h5.ui.header {
+  font-size: 12.3px !important;
+}
+
+.ui.popup {
+  padding: 0.3em 0.5em !important;
+}
+
+.ui.form .disabled.field,
+.ui.form .disabled.fields .field,
+.ui.form .field :disabled {
+  opacity: 1 !important;
+}
+
+.ui.grid > .row > .column {
+  padding: 0 !important;
+}
+
+.ui.grid > .row:first-child {
+  padding: 0 !important;
+}
+
+.ui.grid > .row:last-child {
+  padding: 0 0 0.5em 0 !important;
+}
+
+.ui.header {
+  margin: 0.8em 0 0.4em 0;
+}
+
+.ui.form .field {
+  margin: 0.3em 0;
+}
+
+p {
+  margin: 0.1em 0 !important;
+}
+
+.ui.form textarea {
+  height: 28px;
+  padding: 4px;
+}
+
+.ui.input input {
+  height: 30px !important;
+  padding: 0.5em !important;
+}
+
+.ui.table.activity-list td {
+  height: 38px !important;
+}
