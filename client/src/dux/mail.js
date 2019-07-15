@@ -25,7 +25,7 @@ function* sendMailWorker(action) {
   try {
     const response = yield call(send, action);
     yield put(sendedMail());
-    if (response.status === 200) {
+    if (response.status === 200 && !response.data.responseCode) {
       yield put(showNotification({ success: true }));
     } else {
       yield put(showNotification({ success: false }));

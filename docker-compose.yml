@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 services:
   rfo-form-backend:
     container_name: rfo-form-backend
@@ -13,7 +13,7 @@ services:
       - EMAIL_SENDER_PW=${EMAIL_SENDER_PW}
       - EMAIL_TO=${EMAIL_TO}
     ports:
-      - "3001:3001"
+      - '3001:3001'
     links:
       - mongodb
 
@@ -24,12 +24,12 @@ services:
       - ./client:/usr/src/
       - /usr/src/node_modules
     ports:
-      - "7676:3000"
+      - '7676:3000'
   mongodb:
     container_name: rfo-form-mongodb
     image: mongo:latest
     ports:
-      - "27017:27017"
+      - '27017:27017'
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}

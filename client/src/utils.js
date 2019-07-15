@@ -78,3 +78,8 @@ export const formatDates = events => {
   });
   return { disabledDays, from16, until12 };
 };
+
+export const validEmail = email =>
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(
+    email
+  ); // credit: MDN

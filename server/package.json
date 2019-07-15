@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon server.js --exec babel-node"
+    "start": "nodemon server.js --exec babel-node",
+    "start:prod": "node server.js --exec babel-node"
   },
   "dependencies": {
     "babel-cli": "^6.26.0",

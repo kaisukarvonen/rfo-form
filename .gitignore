@@ -5,3 +5,9 @@ mongo-data/
 .vscode
 .client
 npm-debug.log
+node_modules
+pyenv/
+images/
+fabfile.py
+Dockerfile.*
+docker-compose.prod.yml*

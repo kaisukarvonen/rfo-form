@@ -8,7 +8,7 @@ import CompanyForm from './CompanyForm';
 import Extras from './Extras';
 import PrivatePersonForm from './PrivatePersonForm';
 import createHTML from './Template';
-import { lan, getCalendarEvents, formatDates } from '../utils';
+import { lan, getCalendarEvents, formatDates, validEmail } from '../utils';
 
 class Form extends React.Component {
   state = {
@@ -137,9 +137,24 @@ class Form extends React.Component {
     // alvPrice
     const priceField = this.state.type === 'company' ? 'price' : 'alvPrice';
     let price = 0;
-    const { linen, towels, hottub, meetingType, to, from, type, cottages, cleaning, specialDates, petFee, laavu } = this.state;
+    const {
+      linen,
+      towels,
+      hottub,
+      meetingType,
+      to,
+      from,
+      type,
+      cottages,
+      cleaning,
+      specialDates,
+      petFee,
+      laavu,
+      recreationType
+    } = this.state;
 
     price = meetingType ? this.getObjectInList('meetingOptions', this.state.meetingType).price : 0;
+    price = recreationType ? this.getObjectInList('recreationOptions', this.state.recreationType).price : 0;
     price +=
       (linen ? this.getObject('linen')[priceField] * this.state.personAmount : 0) +
       (towels ? this.getObject('towels')[priceField] * this.state.personAmount : 0) +
@@ -166,7 +181,8 @@ class Form extends React.Component {
       price +=
         numOfNights < 2
           ? this.getObject('acommodationPrices')[activePeriod]['1']
-          : this.getObject('acommodationPrices')[activePeriod]['1'] + (numOfNights - 1) * this.getObject('acommodationPrices')[activePeriod]['2'];
+          : this.getObject('acommodationPrices')[activePeriod]['1'] +
+            (numOfNights - 1) * this.getObject('acommodationPrices')[activePeriod]['2'];
       const numOfCottages = cottages.filter(Boolean).length;
       price += cleaning
         ? activePeriod === 'summer'
@@ -195,13 +211,15 @@ class Form extends React.Component {
       this.state.personAmount,
       this.state.type
     ];
-    if (!mandatoryFields.includes('') && !mandatoryFields.includes(undefined)) {
-      this.setState({
-        errors: { ...this.state.errors, mandatoryFields: undefined }
-      });
-      return true;
-    }
-    return false;
+    const fieldsFilled = !mandatoryFields.includes('') && !mandatoryFields.includes(undefined);
+    const isValidEmail = validEmail(this.state.email);
+    this.setState({
+      errors: {
+        mandatoryFields: fieldsFilled ? undefined : 'Täytä pakolliset kentät!',
+        isValidEmail: isValidEmail ? undefined : 'Tarkista että sähköposti on oikeassa muodossa!'
+      }
+    });
+    return fieldsFilled && isValidEmail;
   };
 
   sendMail = () => {
@@ -211,13 +229,6 @@ class Form extends React.Component {
       let description = `Tarjouspyyntö ajalle ${strDates} henkilöltä ${this.state.name} `;
       const html = createHTML(this.createDataFields(), title, description, this.state.moreInformation);
       this.props.sendMail(this.state.email, title, html);
-    } else {
-      this.setState({
-        errors: {
-          ...this.state.errors,
-          mandatoryFields: 'Täytä pakolliset kentät!'
-        }
-      });
     }
     window.scrollTo(0, 0);
   };
@@ -252,6 +263,8 @@ class Form extends React.Component {
       }
     });
 
+    const priceField = this.state.type === 'company' ? 'price' : 'alvPrice';
+
     const food = { title: 'Tarjoilut' };
     this.getObject('foodOptions').options.forEach(ac => {
       food[this.getObjectInList('foodOptions', ac.key).fi] = !!data[ac.key];
@@ -269,13 +282,17 @@ class Form extends React.Component {
     });
 
     this.getObject('rentalEquipment').options.forEach(rental => {
-      activities[this.getObjectInList('rentalEquipment', rental.key).fi] = !!data[rental.key];
+      const field = this.getObjectInList('rentalEquipment', rental.key);
+      const price = field[priceField] || field.alvPrice;
+      activities[`${field.fi} ${price ? `( ${price} € )` : ''}`] = !!data[rental.key];
     });
 
     const services = ['linen', 'towels', 'hottub', 'cleaning', 'laavu', 'petFee'];
     const extraServices = { title: 'Lisäpalvelut' };
     services.forEach(s => {
-      extraServices[this.getObject(s).fi] = !!data[s];
+      const field = this.getObject(s);
+      const price = field[priceField] || field.alvPrice;
+      extraServices[`${field.fi} ${price ? `( ${price} € )` : ''}`] = !!data[s];
     });
     this.getObject('meetingEquipment').options.forEach(ac => {
       extraServices[this.getObjectInList('meetingEquipment', ac.key).fi] = !!data[ac.key];
@@ -322,7 +339,9 @@ class Form extends React.Component {
               .add(1, 'days')
               .format('DD.MM.YYYY')}`;
       }
-      return diff !== 0 ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}` : moment(from).format('DD.MM.YYYY');
+      return diff !== 0
+        ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}`
+        : moment(from).format('DD.MM.YYYY');
     } else if (from && !to) {
       if (this.state.type !== 'company') {
         return `${moment(from).format('DD.MM.YYYY')} - ${moment(from)
@@ -512,9 +531,11 @@ class Form extends React.Component {
               />
             </SemanticForm.Group>
 
-            {this.state.errors.mandatoryFields && (
+            {Object.values(this.state.errors).some(Boolean) && (
               <Message negative>
-                <Message.Content>{this.state.errors.mandatoryFields}</Message.Content>
+                {Object.keys(this.state.errors).map(
+                  errorKey => this.state.errors[errorKey] && <Message.Content>{this.state.errors[errorKey]}</Message.Content>
+                )}
               </Message>
             )}
             {this.state.type === 'company' && (
@@ -536,7 +557,12 @@ class Form extends React.Component {
               />
             )}
             {this.state.type && (
-              <Extras getObject={this.getObject} showInfo={this.showInfo} values={this.state} handleOnChange={this.handleOnChange} />
+              <Extras
+                getObject={this.getObject}
+                showInfo={this.showInfo}
+                values={this.state}
+                handleOnChange={this.handleOnChange}
+              />
             )}
 
             <SemanticForm>
@@ -554,7 +580,9 @@ class Form extends React.Component {
               {this.getObject('priceTitle').fi}
             </Header>
             <p>
-              {`Alustava hinta sisältäen valitut palvelut: ${this.calculatePrice()} €`}
+              {`Alustava hinta ${
+                this.state.type === 'company' ? '(alv 0%)' : ''
+              } sisältäen hinnoitellut palvelut: ${this.calculatePrice()} €`}
               <br />
               Tarjoilujen ja ohjelmien hinnat määräytyvät saatavuuden mukaan. Pidätämme oikeuden muutoksiin.
             </p>
@@ -563,7 +591,7 @@ class Form extends React.Component {
                 <Message.Content>{this.getObject('paymentInfo')[this.state.type].fi}</Message.Content>
               </Message>
             )}
-            <SemanticForm.Button primary content={'Lähetä'} onClick={this.sendMail} />
+            <SemanticForm.Button primary content="Lähetä" onClick={this.sendMail} />
           </SemanticForm>
         </Container>
       </React.Fragment>
