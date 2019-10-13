@@ -2,27 +2,26 @@ import React from 'react';
 import { Email, Item, Span, renderEmail } from 'react-html-email';
 
 function createHTML(data, title, description, moreInformation) {
-  const header = { paddingTop: '15px' };
   return renderEmail(
     <Email title={title} align="left">
       <Item>{description}</Item>
       <br />
-      {Object.keys(data).map(innerObject => (
-        <div>
-          <Item style={header}>
+      {Object.keys(data).map((innerObject, i) => (
+        <div key={i}>
+          <Item style={{ paddingTop: 15 }}>
             <Span fontSize={17}>{data[innerObject].title}</Span>
           </Item>
           {Object.keys(data[innerObject]).map(
-            key =>
+            (key, ind) =>
               key !== 'title' &&
               data[innerObject][key] && (
-                <Item>
-                  <Span fontSize={13} style={{ display: 'inline-block', width: '300px' }}>
+                <Item key={ind}>
+                  <Span fontSize={13}>
                     <b>{`${key}`}</b>
+                    <br />
                   </Span>
-                  <Span fontSize={13} style={{ width: '500px' }}>
-                    {data[innerObject][key]}
-                  </Span>
+                  <Span fontSize={13}>{data[innerObject][key]}</Span>
+                  <hr />
                 </Item>
               )
           )}

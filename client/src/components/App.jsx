@@ -10,11 +10,14 @@ import '../css/DayPicker.css';
 import ErrorBoundary from './ErrorBoundary';
 import Notification from './Notification';
 import Form from './Form';
+import DatePicker from './DatePicker';
 
 const App = ({ hideNotification, notification, fetchFields, fields, sendingEmail, sendMail }) => {
   useEffect(() => {
     fetchFields();
   }, []);
+
+  const showCalendarOnly = () => window.location.href.includes('calendar');
 
   return (
     <ErrorBoundary>
@@ -23,7 +26,7 @@ const App = ({ hideNotification, notification, fetchFields, fields, sendingEmail
           <Dimmer active={sendingEmail} inverted>
             <Loader inverted>Viestiäsi lähetetään ...</Loader>
           </Dimmer>
-          <Form fields={fields} sendMail={sendMail} />
+          {showCalendarOnly() ? <DatePicker compact calendarOnly /> : <Form fields={fields} sendMail={sendMail} />}
         </div>
       )}
       {!!Object.getOwnPropertyNames(notification).length && (

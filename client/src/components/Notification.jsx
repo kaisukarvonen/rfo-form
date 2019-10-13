@@ -10,7 +10,7 @@ const Notification = ({ hideNotification, notification }) => {
     <Transition visible={visible} unmountOnHide transitionOnMount onHide={hideNotification}>
       <Modal dimmer="inverted" size="small" open>
         <Modal.Content>
-          <Icon link name="close" style={{ float: 'right' }} onClick={setVisibility(false)} />
+          <Icon link name="close" style={{ float: 'right' }} onClick={() => setVisibility(false)} />
           <p style={{ fontSize: '16px' }}>
             {notification.success ? (
               successMsg

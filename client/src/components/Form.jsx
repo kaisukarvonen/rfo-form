@@ -1,14 +1,13 @@
 import React from 'react';
-import { Container, Header, Form as SemanticForm, Popup, Label, Message } from 'semantic-ui-react';
-import DayPicker from 'react-day-picker';
-import MomentLocaleUtils from 'react-day-picker/moment';
+import { Container, Header, Form as SemanticForm, Popup, Message } from 'semantic-ui-react';
 import 'moment/locale/fi';
 import moment from 'moment';
 import CompanyForm from './CompanyForm';
 import Extras from './Extras';
 import PrivatePersonForm from './PrivatePersonForm';
 import createHTML from './Template';
-import { lan, getCalendarEvents, formatDates, validEmail } from '../utils';
+import { lan, validEmail } from '../utils';
+import DatePicker from './DatePicker';
 
 class Form extends React.Component {
   state = {
@@ -25,14 +24,6 @@ class Form extends React.Component {
   };
 
   componentDidMount = () => {
-    getCalendarEvents().then(response => {
-      const { disabledDays, from16, until12 } = formatDates(response.data.items);
-      this.setState({
-        disabledDays,
-        availableFrom16: from16,
-        availableUntil12: until12
-      });
-    });
     this.setState({
       cottages: new Array(this.getObjectInList('extraPersons', 'cottage').choices.length).fill(false)
     });
@@ -374,12 +365,6 @@ class Form extends React.Component {
 
   render() {
     const { from, to } = this.state;
-    const modifiers = {
-      start: from,
-      end: to,
-      availableUntil12: this.state.availableUntil12,
-      availableFrom16: this.state.availableFrom16
-    };
     const dateValue = this.dateToStr(from, to);
     const timeOptions = this.getTimeOptions();
     return (
@@ -408,7 +393,7 @@ class Form extends React.Component {
                 <Popup
                   flowing
                   on="click"
-                  position="top left"
+                  position="left center"
                   open={this.state.open}
                   onClose={this.toggleDatePicker}
                   onOpen={this.toggleDatePicker}
@@ -417,48 +402,30 @@ class Form extends React.Component {
                       required
                       width={5}
                       label={this.getObject('dates').fi}
-                      icon="calendar alternate outline"
+                      icon="calendar outline"
                       id="dates"
                       value={dateValue}
                     />
                   }
                   content={
                     <React.Fragment>
-                      <DayPicker
-                        localeUtils={MomentLocaleUtils}
-                        locale={'fi'}
-                        numberOfMonths={2}
-                        fromMonth={new Date()}
-                        className="Selectable"
-                        onDayClick={this.handleDayClick}
-                        modifiers={modifiers}
-                        selectedDays={[from, { from, to }]}
-                        disabledDays={[{ before: new Date() }, ...this.state.disabledDays]}
+                      <DatePicker
+                        className="hide-mobile"
+                        from={from}
+                        to={to}
+                        handleDayClick={this.handleDayClick}
+                        until12Info={this.state.until12Info}
+                        from16Info={this.state.from16Info}
                       />
-                      <div style={{ margin: '0 0 0 20px' }}>
-                        {this.state.until12Info && <p>Vapaa klo 12 asti</p>}
-                        {this.state.from16Info && <p>Vapaa klo 16 alkaen</p>}
-                        <Label
-                          style={{
-                            backgroundColor: '#c2e2b3',
-                            margin: '0 8px 0 0'
-                          }}
-                          size="large"
-                          circular
-                          empty
-                        />
-                        Vapaa
-                        <Label
-                          style={{
-                            backgroundColor: '#ffc107',
-                            margin: '0 8px'
-                          }}
-                          size="large"
-                          circular
-                          empty
-                        />
-                        Osittain vapaa
-                      </div>
+                      <DatePicker
+                        className="hide-fullscreen"
+                        compact
+                        from={from}
+                        to={to}
+                        handleDayClick={this.handleDayClick}
+                        until12Info={this.state.until12Info}
+                        from16Info={this.state.from16Info}
+                      />
                     </React.Fragment>
                   }
                 />
@@ -565,16 +532,14 @@ class Form extends React.Component {
               />
             )}
 
-            <SemanticForm>
-              <SemanticForm.TextArea
-                rows={3}
-                autoHeight
-                label={'Lisätietoja tarjouspyyntöön'}
-                value={this.moreInformation}
-                id="moreInformation"
-                onChange={this.handleOnChange}
-              />
-            </SemanticForm>
+            <SemanticForm.TextArea
+              rows={3}
+              autoHeight
+              label={'Lisätietoja tarjouspyyntöön'}
+              value={this.moreInformation}
+              id="moreInformation"
+              onChange={this.handleOnChange}
+            />
 
             <Header as="h4" dividing>
               {this.getObject('priceTitle').fi}
