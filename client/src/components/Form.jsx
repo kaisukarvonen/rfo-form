@@ -1,88 +1,83 @@
-import React from 'react';
-import { Container, Header, Form as SemanticForm, Popup, Message } from 'semantic-ui-react';
+import React, { useState, useEffect } from 'react';
+import { Container, Header, Form as SemanticForm, Popup, Message, Grid, Button } from 'semantic-ui-react';
 import 'moment/locale/fi';
 import moment from 'moment';
 import CompanyForm from './CompanyForm';
 import Extras from './Extras';
 import PrivatePersonForm from './PrivatePersonForm';
 import createHTML from './Template';
-import { lan, validEmail } from '../utils';
+import { validEmail } from '../utils';
 import DatePicker from './DatePicker';
+import BasicDetails from './BasicDetails';
 
-class Form extends React.Component {
-  state = {
-    type: undefined,
-    popupOpen: false,
-    from: undefined,
-    to: undefined,
-    personAmount: 1,
-    errors: {},
-    activeIndex: 0,
-    disabledDays: [],
-    specialDates: [{ date: 24, month: 12 }, { date: 31, month: 12 }],
-    moreInformation: ''
-  };
+const initialForm = {
+  type: 'private',
+  from: undefined,
+  to: undefined,
+  personAmount: 1,
+  activeIndex: 0,
+  disabledDays: [],
+  moreInformation: '',
+  cottages: []
+};
 
-  componentDidMount = () => {
-    this.setState({
-      cottages: new Array(this.getObjectInList('extraPersons', 'cottage').choices.length).fill(false)
-    });
-  };
+const specialDates = [
+  { date: 24, month: 12 },
+  { date: 31, month: 12 }
+];
 
-  getTimeOptions = () => {
-    const times = ['08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18'];
-    const options = [];
-    times.forEach(hour => {
-      options.push({ key: hour, value: hour, text: `${hour}:00` });
-    });
-    return options;
-  };
+const Form = ({ fields, sendMail }) => {
+  const [formData, setFormData] = useState(initialForm);
+  const [errors, setErrors] = useState({});
+  const [popupOpen, setPopup] = useState(false);
+  const [activePeriod, setActivePeriod] = useState(undefined);
 
-  getObject = key => this.props.fields.find(field => field.key === key);
-  getObjectInList = (key, innerKey) => this.getObject(key).options.find(option => option.key === innerKey);
+  const getObject = key => fields.find(field => field.key === key);
+  const getObjectInList = (key, innerKey) => getObject(key).options.find(option => option.key === innerKey);
 
-  handleOnChange = (e, data) => {
-    this.setState({
+  const handleOnChange = (e, data) => {
+    setFormData({
+      ...formData,
       [data.id]: data.type === 'checkbox' ? data.checked : data.value,
-      visitType: data.id === 'visitTypeString' ? undefined : this.state.visitType
+      visitType: data.id === 'visitTypeString' ? undefined : formData.visitType
     });
   };
 
-  handleCottageChange = (e, data) => {
-    const cottages = [...this.state.cottages];
+  const handleCottageChange = (e, data) => {
+    const cottages = [...formData.cottages];
     cottages.splice(data.id - 1, 1, data.checked);
-    this.setState({ cottages });
+    setFormData({ ...formData, cottages });
   };
 
-  handleOnRadioChange = (e, data, id) => {
-    let newState = {};
+  const handleOnRadioChange = (e, data, id) => {
+    let newFormData = {};
     const values = {
       locationType: undefined,
       meetingType: undefined,
       visitTypeString: ''
     };
-    if (id === 'type' && this.state.type !== data.value) {
-      newState = {
+    if (id === 'type' && formData.type !== data.value) {
+      newFormData = {
         ...values,
         visitType: undefined,
-        companyName: '',
-        errors: { ...this.state.errors }
+        companyName: ''
       };
       if (data.value === 'private') {
-        newState = { ...newState, departTime: '12', arrivalTime: '16' };
+        newFormData = { ...newFormData, departTime: '12', arrivalTime: '16' };
       }
-    } else if (id === 'visitType' && this.state.visitType !== data.value) {
-      newState = values;
+    } else if (id === 'visitType' && formData.visitType !== data.value) {
+      newFormData = values;
     }
-    this.setState({ [id]: data.value, ...newState });
+    setFormData({ ...formData, [id]: data.value, ...newFormData });
+    // setErrors();
   };
 
-  toggleDatePicker = () => {
-    this.setState({ popupOpen: !this.state.popupOpen });
+  const toggleDatePicker = () => {
+    setPopup(!popupOpen);
   };
 
-  handleDayClick = (day, modifiers) => {
-    let { to, from } = this.state;
+  const handleDayClick = (day, modifiers) => {
+    let { to, from } = formData;
     if (!from) {
       from = day;
     } else if (!to) {
@@ -102,145 +97,131 @@ class Form extends React.Component {
     }
     // do not change on past days
     if (moment().diff(day, 'days') <= 0) {
-      let { arrivalTime, departTime } = this.state;
-      if (this.state.type !== 'company') {
+      let { arrivalTime, departTime } = formData;
+      if (formData.type !== 'company') {
         arrivalTime = '16';
         departTime = '12';
       }
-      this.setState({
+      let { cottages } = formData;
+      if (from) {
+        const period = [10, 11, 0, 1, 2, 3].includes(from.getMonth()) ? 'winter' : 'summer';
+        cottages = activePeriod === period && cottages.length ? cottages : cottageOptions(period);
+        setActivePeriod(period);
+      }
+      setFormData({
+        ...formData,
         to,
         from,
         arrivalTime,
         departTime,
         until12Info: modifiers.availableUntil12,
-        from16Info: modifiers.availableFrom16
+        from16Info: modifiers.availableFrom16,
+        cottages
       });
     }
   };
 
-  foodOptions = key => {
-    const object = this.getObject(key);
-    const number = object.options ? object.options.length : '';
-    return lan === 'fi' ? `${number} vaihtoehtoa` : `${number} options`;
-  };
-
-  calculatePrice = () => {
+  const calculatePrice = () => {
     // alvPrice
-    const priceField = this.state.type === 'company' ? 'price' : 'alvPrice';
+    const priceField = formData.type === 'company' ? 'price' : 'alvPrice';
     let price = 0;
-    const {
-      linen,
-      towels,
-      hottub,
-      meetingType,
-      to,
-      from,
-      type,
-      cottages,
-      cleaning,
-      specialDates,
-      petFee,
-      laavu,
-      recreationType
-    } = this.state;
+    const { linen, towels, hottub, meetingType, to, from, type, cottages, cleaning, petFee, laavu, recreationType } = formData;
 
-    price = meetingType ? this.getObjectInList('meetingOptions', this.state.meetingType).price : 0;
-    price = recreationType ? this.getObjectInList('recreationOptions', this.state.recreationType).price : 0;
+    price = meetingType ? getObjectInList('meetingOptions', formData.meetingType).price : 0;
+    price = recreationType ? getObjectInList('recreationOptions', formData.recreationType).price : 0;
     price +=
-      (linen ? this.getObject('linen')[priceField] * this.state.personAmount : 0) +
-      (towels ? this.getObject('towels')[priceField] * this.state.personAmount : 0) +
-      (petFee ? this.getObject('petFee')[priceField] : 0) +
-      (laavu ? this.getObject('laavu')[priceField] : 0) +
-      (hottub ? this.getObject('hottub')[priceField] : 0);
-    this.getObject('rentalEquipment').options.forEach(option => {
-      price += this.state[option.key] ? option[priceField] || option.alvPrice : 0;
+      (linen ? getObject('linen')[priceField] * formData.personAmount : 0) +
+      (towels ? getObject('towels')[priceField] * formData.personAmount : 0) +
+      (petFee ? getObject('petFee')[priceField] : 0) +
+      (laavu ? getObject('laavu')[priceField] : 0) +
+      (hottub ? getObject('hottub')[priceField] : 0);
+    getObject('rentalEquipment').options.forEach(option => {
+      price += formData[option.key] ? option[priceField] || option.alvPrice : 0;
     });
-    let activePeriod = '';
+    // let activePeriod = '';
     if (type !== 'company' && (to || from)) {
       let numOfNights = 1;
       if (from && to) {
         numOfNights = moment(to).diff(moment(from), 'days');
       }
-      activePeriod = [9, 10, 11, 0, 1, 2, 3].includes(from.getMonth()) ? 'winter' : 'summer';
+      // activePeriod = [9, 10, 11, 0, 1, 2, 3].includes(from.getMonth()) ? 'winter' : 'summer';
       const strFrom = { date: from.getDate(), month: from.getMonth() + 1 };
       specialDates.forEach(date => {
         if (JSON.stringify(date) === JSON.stringify(strFrom)) {
           // for special dates summer peak prices are valid
-          activePeriod = 'summer';
+          // activePeriod = 'summer';
         }
       });
       price +=
         numOfNights < 2
-          ? this.getObject('acommodationPrices')[activePeriod]['1']
-          : this.getObject('acommodationPrices')[activePeriod]['1'] +
-            (numOfNights - 1) * this.getObject('acommodationPrices')[activePeriod]['2'];
+          ? getObject('acommodationPrices')[activePeriod]['1']
+          : getObject('acommodationPrices')[activePeriod]['1'] +
+            (numOfNights - 1) * getObject('acommodationPrices')[activePeriod]['2'];
       const numOfCottages = cottages.filter(Boolean).length;
       price += cleaning
         ? activePeriod === 'summer'
-          ? this.getObject('cleaning').summer
-          : this.getObject('cleaning').winter.villa + this.getObject('cleaning').winter.cottage * numOfCottages
+          ? getObject('cleaning').summer
+          : getObject('cleaning').winter.villa + getObject('cleaning').winter.cottage * numOfCottages
         : 0;
-      this.getObject('extraPersons').options.forEach(o => {
+      getObject('extraPersons').options.forEach(o => {
         if (o.key === 'cottage') {
           price += numOfCottages > 0 && activePeriod !== 'summer' ? o.price * numOfNights * numOfCottages : 0;
         } else {
-          price += this.state[o.key] ? o.price * numOfNights : 0;
+          price += formData[o.key] ? o.price * numOfNights : 0;
         }
       });
     }
     return price;
   };
 
-  isValid = () => {
-    const date = this.state.to || this.state.from;
+  const isValid = () => {
+    const date = formData.to || formData.from;
     const mandatoryFields = [
-      this.state.name,
-      this.state.email,
+      formData.name,
+      formData.email,
       date,
-      this.state.arrivalTime,
-      this.state.departTime,
-      this.state.personAmount,
-      this.state.type
+      formData.arrivalTime,
+      formData.departTime,
+      formData.personAmount,
+      formData.type
     ];
     const fieldsFilled = !mandatoryFields.includes('') && !mandatoryFields.includes(undefined);
-    const isValidEmail = validEmail(this.state.email);
-    this.setState({
-      errors: {
-        mandatoryFields: fieldsFilled ? undefined : 'Täytä pakolliset kentät!',
-        isValidEmail: isValidEmail ? undefined : 'Tarkista että sähköposti on oikeassa muodossa!'
-      }
+    const isValidEmail = validEmail(formData.email);
+    setErrors({
+      mandatoryFields: fieldsFilled ? undefined : 'Täytä pakolliset kentät!',
+      isValidEmail: isValidEmail ? undefined : 'Tarkista että sähköposti on oikeassa muodossa!'
     });
     return fieldsFilled && isValidEmail;
   };
 
-  sendMail = () => {
-    if (this.isValid()) {
-      const strDates = this.dateToStr(this.state.from, this.state.to);
+  const createMail = () => {
+    if (isValid()) {
+      const strDates = dateToStr(formData.from, formData.to);
       const title = `Tarjouspyyntö ${strDates}`;
-      let description = `Tarjouspyyntö ajalle ${strDates} henkilöltä ${this.state.name} `;
-      const html = createHTML(this.createDataFields(), title, description, this.state.moreInformation);
-      this.props.sendMail(this.state.email, title, html);
+      let description = `Tarjouspyyntö ajalle ${strDates} henkilöltä ${formData.name} `;
+      const html = createHTML(createDataFields(), title, description, formData.moreInformation);
+      sendMail(formData.email, title, html);
     }
     window.scrollTo(0, 0);
   };
 
-  createDataFields = () => {
-    const data = this.state;
+  const createDataFields = () => {
+    const data = formData;
     const basicInfo = {
-      title: this.getObject('contactDetails').fi,
-      [this.getObject('name').fi]: data.name,
-      [this.getObject('email').fi]: data.email,
-      [this.getObject('phone').fi]: data.phone,
-      [this.getObject('address').fi]: data.address,
-      [this.getObject('dates').fi]: this.dateToStr(data.from, data.to),
-      [this.getObject('arrivalTime').fi]: `klo ${data.arrivalTime}`,
-      [this.getObject('departTime').fi]: `klo ${data.departTime}`,
-      [this.getObject('personAmount').fi]: data.personAmount,
-      Asiakastyyppi: this.getObject(data.type).fi,
-      Hinta: `${this.calculatePrice()} €`
+      title: getObject('contactDetails').fi,
+      [getObject('name').fi]: data.name,
+      [getObject('email').fi]: data.email,
+      [getObject('phone').fi]: data.phone,
+      [getObject('address').fi]: data.address,
+      [getObject('dates').fi]: dateToStr(data.from, data.to),
+      [getObject('arrivalTime').fi]: `klo ${data.arrivalTime}`,
+      [getObject('departTime').fi]: `klo ${data.departTime}`,
+      [getObject('personAmount').fi]: data.personAmount,
+      Asiakastyyppi: getObject(data.type).fi,
+      Hinta: `${calculatePrice()} €`
     };
     const extraPersons = { title: 'Lisähenkilöt' };
-    this.getObject('extraPersons').options.forEach(ac => {
+    getObject('extraPersons').options.forEach(ac => {
       if (ac.key === 'cottage') {
         let cottages = '';
         data.cottages.forEach((val, i) => {
@@ -254,26 +235,26 @@ class Form extends React.Component {
       }
     });
 
-    const priceField = this.state.type === 'company' ? 'price' : 'alvPrice';
+    const priceField = formData.type === 'company' ? 'price' : 'alvPrice';
 
     const food = { title: 'Tarjoilut' };
-    this.getObject('foodOptions').options.forEach(ac => {
-      food[this.getObjectInList('foodOptions', ac.key).fi] = !!data[ac.key];
+    getObject('foodOptions').options.forEach(ac => {
+      food[getObjectInList('foodOptions', ac.key).fi] = !!data[ac.key];
     });
 
     const activities = { title: 'Aktiviteetit ja ohjelmat' };
-    this.getObject('allYearRound').options.forEach(ac => {
-      activities[this.getObjectInList('allYearRound', ac.key).fi] = !!data[ac.key];
+    getObject('allYearRound').options.forEach(ac => {
+      activities[getObjectInList('allYearRound', ac.key).fi] = !!data[ac.key];
     });
-    this.getObject('summer').options.forEach(ac => {
-      activities[this.getObjectInList('summer', ac.key).fi] = !!data[ac.key];
+    getObject('summer').options.forEach(ac => {
+      activities[getObjectInList('summer', ac.key).fi] = !!data[ac.key];
     });
-    this.getObject('winter').options.forEach(ac => {
-      activities[this.getObjectInList('winter', ac.key).fi] = !!data[ac.key];
+    getObject('winter').options.forEach(ac => {
+      activities[getObjectInList('winter', ac.key).fi] = !!data[ac.key];
     });
 
-    this.getObject('rentalEquipment').options.forEach(rental => {
-      const field = this.getObjectInList('rentalEquipment', rental.key);
+    getObject('rentalEquipment').options.forEach(rental => {
+      const field = getObjectInList('rentalEquipment', rental.key);
       const price = field[priceField] || field.alvPrice;
       activities[`${field.fi} ${price ? `( ${price} € )` : ''}`] = !!data[rental.key];
     });
@@ -281,12 +262,12 @@ class Form extends React.Component {
     const services = ['linen', 'towels', 'hottub', 'cleaning', 'laavu', 'petFee'];
     const extraServices = { title: 'Lisäpalvelut' };
     services.forEach(s => {
-      const field = this.getObject(s);
+      const field = getObject(s);
       const price = field[priceField] || field.alvPrice;
       extraServices[`${field.fi} ${price ? `( ${price} € )` : ''}`] = !!data[s];
     });
-    this.getObject('meetingEquipment').options.forEach(ac => {
-      extraServices[this.getObjectInList('meetingEquipment', ac.key).fi] = !!data[ac.key];
+    getObject('meetingEquipment').options.forEach(ac => {
+      extraServices[getObjectInList('meetingEquipment', ac.key).fi] = !!data[ac.key];
     });
 
     const visitDetails = { title: 'Vierailun lisätiedot' };
@@ -294,19 +275,19 @@ class Form extends React.Component {
     details.forEach(d => {
       if (data[d]) {
         if (d === 'meetingType') {
-          const object = this.getObjectInList('meetingOptions', data[d]);
+          const object = getObjectInList('meetingOptions', data[d]);
           visitDetails['Kokouksen tyyppi'] = `${object.fi} - ${object.duration}h`;
         } else if (d === 'recreationType') {
-          const object = this.getObjectInList('recreationOptions', data[d]);
+          const object = getObjectInList('recreationOptions', data[d]);
           visitDetails['Virkistyspäivän tyyppi'] = `${object.fi} - ${object.duration}h`;
         } else if (d === 'visitType') {
-          visitDetails['Vierailun tyyppi'] = this.getObject(data.visitType).fi;
+          visitDetails['Vierailun tyyppi'] = getObject(data.visitType).fi;
         } else if (d === 'visitTypeString') {
           visitDetails['Vierailun tyyppi'] = data.visitTypeString;
         } else if (d === 'locationType') {
-          visitDetails.Tilat = this.getObject(data[d]).fi;
+          visitDetails.Tilat = getObject(data[d]).fi;
         } else {
-          visitDetails[this.getObject(d).fi] = data[d];
+          visitDetails[getObject(d).fi] = data[d];
         }
       }
     });
@@ -320,10 +301,10 @@ class Form extends React.Component {
     };
   };
 
-  dateToStr = (from, to) => {
+  const dateToStr = (from, to) => {
     if (from && to) {
       const diff = moment(to).diff(moment(from), 'days');
-      if (this.state.type !== 'company') {
+      if (formData.type !== 'company') {
         return diff !== 0
           ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}`
           : `${moment(from).format('DD.MM.YYYY')} - ${moment(from)
@@ -334,7 +315,7 @@ class Form extends React.Component {
         ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}`
         : moment(from).format('DD.MM.YYYY');
     } else if (from && !to) {
-      if (this.state.type !== 'company') {
+      if (formData.type !== 'company') {
         return `${moment(from).format('DD.MM.YYYY')} - ${moment(from)
           .add(1, 'days')
           .format('DD.MM.YYYY')}`;
@@ -344,7 +325,15 @@ class Form extends React.Component {
     return '';
   };
 
-  showInfo = object => {
+  const setType = type => {
+    setFormData({ ...formData, type });
+  };
+
+  const cottageOptions = period => {
+    return new Array(getObjectInList('extraPersons', 'cottage')[period].choices.length).fill(false);
+  };
+
+  const showInfo = object => {
     let info = object.infoFi;
     if (info && info.includes('*s_link*')) {
       const link = '*s_link*';
@@ -363,205 +352,108 @@ class Form extends React.Component {
     return info;
   };
 
-  render() {
-    const { from, to } = this.state;
-    const dateValue = this.dateToStr(from, to);
-    const timeOptions = this.getTimeOptions();
-    return (
-      <React.Fragment>
-        <div className="site-header">
-          <h3 className="header-title">Tarjouspyyntö - Nuuksion Taika</h3>
-          <p>
-            <a href="https://www.nuuksiontaika.fi/">Takaisin Nuuksion Taian sivuille</a>
-          </p>
-        </div>
-        <Container style={{ marginTop: '20px' }}>
-          <SemanticForm style={{ margin: '0 5%' }} noValidate="novalidate">
-            <Header as="h4" dividing>
-              {this.getObject('contactDetails').fi}
-            </Header>
-            <SemanticForm.Group widths="equal">
-              <SemanticForm.Input required label={this.getObject('name').fi} id="name" onChange={this.handleOnChange} />
-              <SemanticForm.Input required label={this.getObject('email').fi} id="email" onChange={this.handleOnChange} />
-            </SemanticForm.Group>
-            <SemanticForm.Group widths="equal">
-              <SemanticForm.Input label={this.getObject('phone').fi} id="phone" onChange={this.handleOnChange} />
-              <SemanticForm.Input label={this.getObject('address').fi} id="address" onChange={this.handleOnChange} />
-            </SemanticForm.Group>
-            {this.state.type && (
-              <SemanticForm.Group>
-                <Popup
-                  flowing
-                  on="click"
-                  position="left center"
-                  open={this.state.open}
-                  onClose={this.toggleDatePicker}
-                  onOpen={this.toggleDatePicker}
-                  trigger={
-                    <SemanticForm.Input
-                      required
-                      width={5}
-                      label={this.getObject('dates').fi}
-                      icon="calendar outline"
-                      id="dates"
-                      value={dateValue}
-                    />
-                  }
-                  content={
-                    <React.Fragment>
-                      <DatePicker
-                        className="hide-mobile"
-                        from={from}
-                        to={to}
-                        handleDayClick={this.handleDayClick}
-                        until12Info={this.state.until12Info}
-                        from16Info={this.state.from16Info}
-                      />
-                      <DatePicker
-                        className="hide-fullscreen"
-                        compact
-                        from={from}
-                        to={to}
-                        handleDayClick={this.handleDayClick}
-                        until12Info={this.state.until12Info}
-                        from16Info={this.state.from16Info}
-                      />
-                    </React.Fragment>
-                  }
-                />
-                <SemanticForm.Select
-                  label={this.getObject('arrivalTime').fi}
-                  width={4}
-                  compact
-                  required
-                  style={{
-                    pointerEvents: this.state.type === 'company' ? 'auto' : 'none'
-                  }}
-                  placeholder="hh:mm"
-                  options={timeOptions}
-                  value={this.state.arrivalTime}
-                  id="arrivalTime"
-                  onChange={this.handleOnChange}
-                />
-                <SemanticForm.Select
-                  label={this.getObject('departTime').fi}
-                  width={4}
-                  compact
-                  required
-                  style={{
-                    pointerEvents: this.state.type === 'company' ? 'auto' : 'none'
-                  }}
-                  placeholder="hh:mm"
-                  options={timeOptions}
-                  value={this.state.departTime}
-                  id="departTime"
-                  onChange={this.handleOnChange}
-                />
-                <SemanticForm.Input
-                  type="number"
-                  label={this.getObject('personAmount').fi}
-                  width={3}
-                  min="1"
-                  required
-                  id="personAmount"
-                  value={this.state.personAmount}
-                  onChange={this.handleOnChange}
-                />
-              </SemanticForm.Group>
-            )}
-            {this.state.type === 'private' && (
-              <React.Fragment>
-                <Message>
-                  <Message.Content>{this.getObject('acommodationInfo').summer.fi}</Message.Content>
+  return (
+    <div className="main">
+      <div className="site-header">
+        <h3 className="header-title">Tarjouspyyntö - Nuuksion Taika</h3>
+        <p>
+          <a href="https://www.nuuksiontaika.fi/">Takaisin Nuuksion Taian sivuille</a>
+        </p>
+      </div>
+      <Container style={{ margin: '40px 0', flexGrow: 1 }}>
+        <SemanticForm style={{ margin: '0 5%' }} noValidate="novalidate">
+          <Grid columns={4} centered>
+            {[
+              { text: 'Yritysasiakas', type: 'company' },
+              { text: 'Yksityisasiakas', type: 'private' }
+            ].map(customer => (
+              <Grid.Column>
+                <Button size="massive" active={formData.type === customer.type} onClick={() => setType(customer.type)}>
+                  {customer.text}
+                </Button>
+              </Grid.Column>
+            ))}
+          </Grid>
+
+          {formData.type && (
+            <React.Fragment>
+              <BasicDetails
+                formData={formData}
+                popupOpen={popupOpen}
+                getObject={getObject}
+                handleDayClick={handleDayClick}
+                handleOnChange={handleOnChange}
+                toggleDatePicker={toggleDatePicker}
+                dateToStr={dateToStr}
+              />
+
+              {Object.values(errors).some(Boolean) && (
+                <Message negative>
+                  {Object.keys(errors).map(errorKey => errors[errorKey] && <Message.Content>{errors[errorKey]}</Message.Content>)}
                 </Message>
-                <Message>
-                  <Message.Content>{this.getObject('acommodationInfo').winter.fi}</Message.Content>
-                </Message>
-              </React.Fragment>
-            )}
-            <Header as="h4">
-              {this.getObject('clientTypeTitle').fi} <sup style={{ color: '#db2828', fontSize: '14px' }}>*</sup>
-            </Header>
-            <SemanticForm.Group inline>
-              <SemanticForm.Radio
-                style={{ paddingRight: '26px' }}
-                label={this.getObject('company').fi}
-                value="company"
-                checked={this.state.type === 'company'}
-                onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')}
-              />
-              <SemanticForm.Radio
-                label={this.getObject('private').fi}
-                value="private"
-                checked={this.state.type === 'private'}
-                onChange={(e, data) => this.handleOnRadioChange(e, data, 'type')}
-              />
-            </SemanticForm.Group>
+              )}
+              {formData.type === 'company' ? (
+                <CompanyForm
+                  getObject={getObject}
+                  handleOnChange={handleOnChange}
+                  handleOnRadioChange={handleOnRadioChange}
+                  values={formData}
+                  showInfo={showInfo}
+                />
+              ) : (
+                formData.cottages &&
+                activePeriod && (
+                  <PrivatePersonForm
+                    getObject={getObject}
+                    handleOnChange={handleOnChange}
+                    handleOnRadioChange={handleOnRadioChange}
+                    values={formData}
+                    handleCottageChange={handleCottageChange}
+                    activePeriod={activePeriod}
+                  />
+                )
+              )}
+              <Extras getObject={getObject} showInfo={showInfo} values={formData} handleOnChange={handleOnChange} />
 
-            {Object.values(this.state.errors).some(Boolean) && (
-              <Message negative>
-                {Object.keys(this.state.errors).map(
-                  errorKey => this.state.errors[errorKey] && <Message.Content>{this.state.errors[errorKey]}</Message.Content>
-                )}
-              </Message>
-            )}
-            {this.state.type === 'company' && (
-              <CompanyForm
-                getObject={this.getObject}
-                handleOnChange={this.handleOnChange}
-                handleOnRadioChange={this.handleOnRadioChange}
-                values={this.state}
-                showInfo={this.showInfo}
+              <SemanticForm.TextArea
+                rows={3}
+                autoHeight
+                label={'Lisätietoja tarjouspyyntöön'}
+                value={formData.moreInformation}
+                id="moreInformation"
+                onChange={handleOnChange}
               />
-            )}
-            {this.state.type === 'private' && (
-              <PrivatePersonForm
-                getObject={this.getObject}
-                handleOnChange={this.handleOnChange}
-                handleOnRadioChange={this.handleOnRadioChange}
-                values={this.state}
-                handleCottageChange={this.handleCottageChange}
-              />
-            )}
-            {this.state.type && (
-              <Extras
-                getObject={this.getObject}
-                showInfo={this.showInfo}
-                values={this.state}
-                handleOnChange={this.handleOnChange}
-              />
-            )}
 
-            <SemanticForm.TextArea
-              rows={3}
-              autoHeight
-              label={'Lisätietoja tarjouspyyntöön'}
-              value={this.moreInformation}
-              id="moreInformation"
-              onChange={this.handleOnChange}
-            />
+              <Header as="h4" dividing>
+                {getObject('priceTitle').fi}
+              </Header>
+              <p>
+                {`Alustava hinta ${
+                  formData.type === 'company' ? '(alv 0%)' : ''
+                } sisältäen hinnoitellut palvelut: ${calculatePrice()} €`}
+                <br />
+                Tarjoilujen ja ohjelmien hinnat määräytyvät saatavuuden mukaan. Pidätämme oikeuden muutoksiin.
+              </p>
 
-            <Header as="h4" dividing>
-              {this.getObject('priceTitle').fi}
-            </Header>
-            <p>
-              {`Alustava hinta ${
-                this.state.type === 'company' ? '(alv 0%)' : ''
-              } sisältäen hinnoitellut palvelut: ${this.calculatePrice()} €`}
-              <br />
-              Tarjoilujen ja ohjelmien hinnat määräytyvät saatavuuden mukaan. Pidätämme oikeuden muutoksiin.
-            </p>
-            {this.state.type && (
               <Message>
-                <Message.Content>{this.getObject('paymentInfo')[this.state.type].fi}</Message.Content>
+                <Message.Content>{getObject('paymentInfo')[formData.type].fi}</Message.Content>
               </Message>
-            )}
-            <SemanticForm.Button primary content="Lähetä" onClick={this.sendMail} />
-          </SemanticForm>
-        </Container>
-      </React.Fragment>
-    );
-  }
-}
+
+              <SemanticForm.Button primary content="Lähetä" onClick={createMail} />
+            </React.Fragment>
+          )}
+        </SemanticForm>
+      </Container>
+      <div className="site-header footer">
+        <h3 className="header-title">Nuuksion Taika</h3>
+        <p>
+          050 5050869
+          <br />
+          <a href="mailto:info@nuuksiontaika.fi">info@nuuksiontaika.fi</a>
+        </p>
+      </div>
+    </div>
+  );
+};
 
 export default Form;

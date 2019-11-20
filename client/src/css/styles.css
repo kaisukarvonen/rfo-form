@@ -2,25 +2,38 @@ body {
   font-size: 13px !important;
 }
 
+.main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
 .site-header a {
   color: #fff;
 }
 
 .site-header {
+  height: 80px;
   width: 100%;
   margin: 0;
   background-color: #172c49;
   display: flex;
-  flex: 1;
+  flex-grow: 0;
   justify-content: space-around;
-  align-items: baseline;
-  padding-top: 1.3rem;
+  align-items: center;
+  padding: 1.3rem 0;
   flex-wrap: wrap;
+  color: #fff;
+}
+
+.site-header .footer {
+  flex-grow: 0;
 }
 
 .header-title {
   text-transform: uppercase;
-  color: #fff;
+  margin: 0;
 }
 
 .ui.selection.dropdown {

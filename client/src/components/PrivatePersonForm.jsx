@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Header, Form, Grid, Accordion, Icon } from 'semantic-ui-react';
 
-const PrivatePersonForm = ({ values, getObject, handleOnChange, handleOnRadioChange, handleCottageChange }) => {
+const PrivatePersonForm = ({ values, getObject, activePeriod, handleOnChange, handleOnRadioChange, handleCottageChange }) => {
   const [showExtraPersons, setShowExtraPersons] = useState(false);
+  console.log(values.cottages);
 
   return (
     <div>
@@ -49,7 +50,7 @@ const PrivatePersonForm = ({ values, getObject, handleOnChange, handleOnRadioCha
                     <React.Fragment>
                       <p>{i.fi}</p>
                       <Form.Group>
-                        {i.choices.map((choice, index) => (
+                        {i[activePeriod].choices.map((choice, index) => (
                           <Form.Checkbox
                             label={`${choice} hlön huone`}
                             id={index + 1}
@@ -64,7 +65,7 @@ const PrivatePersonForm = ({ values, getObject, handleOnChange, handleOnRadioCha
                   )}
                 </Grid.Column>
                 <Grid.Column width={2}>
-                  <p>{i.price} €</p>
+                  <p>{i.key === 'cottage' ? `${i[activePeriod]['1']} €` : `${i.price} €`}</p>
                 </Grid.Column>
               </Grid.Row>
             ))}
