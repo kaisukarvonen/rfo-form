@@ -3,10 +3,9 @@ import { Header, Form, Grid, Checkbox } from 'semantic-ui-react';
 import InfoPopup from './InfoPopup';
 
 const CompanyForm = ({ getObject, values, showInfo, handleOnRadioChange, handleOnChange }) => {
-  const visitOptions = (title, key, type) => {
+  const visitOptions = (key, type) => {
     return (
       <React.Fragment>
-        <Header as="h4">{title}</Header>
         <Grid>
           {getObject(key).options.map(m => (
             <Grid.Row key={m.key}>
@@ -44,53 +43,50 @@ const CompanyForm = ({ getObject, values, showInfo, handleOnRadioChange, handleO
         value={values.companyName}
         onChange={handleOnChange}
       />
-      <Header as="h4">{getObject('visitTypeTitle').fi}</Header>
-      <Form.Radio
-        label={getObject('meeting').fi}
-        value="meeting"
-        checked={values.visitType === 'meeting'}
-        onChange={(e, data) => handleOnRadioChange(e, data, 'visitType')}
-      />
-      <Form.Radio
-        label={getObject('recreational').fi}
-        value="recreational"
-        checked={values.visitType === 'recreational'}
-        onChange={(e, data) => handleOnRadioChange(e, data, 'visitType')}
-      />
-      <Form.Input
-        width={8}
-        label={getObject('visitTypeString').fi}
-        id="visitTypeString"
-        value={values.visitTypeString}
-        onChange={handleOnChange}
-      />
-      {values.visitType === 'meeting' && visitOptions('Millaisen kokouksen haluat pitää?', 'meetingOptions', 'meetingType')}
 
-      {values.visitType === 'recreational' && (
-        <React.Fragment>
-          <Header as="h4">Missä haluat viettää päivän?</Header>
-          <Form.Radio
-            label={`${getObject('villaParatiisi').fi} (max. 20-25 hlöä)`}
-            value="villaParatiisi"
-            checked={values.locationType === 'villaParatiisi'}
-            onChange={(e, data) => handleOnRadioChange(e, data, 'locationType')}
-          />
-          <Form.Radio
-            label={getObject('ilmanTiloja').fi}
-            value="ilmanTiloja"
-            checked={values.locationType === 'ilmanTiloja'}
-            onChange={(e, data) => handleOnRadioChange(e, data, 'locationType')}
-          />
-          <Form.Radio
-            label={getObject('haltia').fi}
-            value="haltia"
-            checked={values.locationType === 'haltia'}
-            onChange={(e, data) => handleOnRadioChange(e, data, 'locationType')}
-          />
-          {values.locationType === 'villaParatiisi' &&
-            visitOptions('Millaisen virkistyspäivän haluat pitää?', 'recreationOptions', 'recreationType')}
-        </React.Fragment>
-      )}
+      <React.Fragment>
+        <Header as="h4">Millaisen päivän haluat viettää?</Header>
+        <Form.Radio
+          label={`${getObject('villaParatiisi').fi} - rantahuvila (max. 20 hlöä, majoitus 14 hlöä)`}
+          value="villaParatiisi"
+          checked={values.locationType === 'villaParatiisi'}
+          onChange={(e, data) => handleOnRadioChange(e, data, 'locationType')}
+        />
+        {values.locationType === 'villaParatiisi' && visitOptions('meetingOptions', 'meetingType')}
+        <Form.Radio
+          label={`${getObject('wainola').fi} - ohjelmatila päiväkäyttöön (max. 50 hlöä)`}
+          value="wainola"
+          checked={values.locationType === 'wainola'}
+          onChange={(e, data) => handleOnRadioChange(e, data, 'locationType')}
+        />
+        {values.locationType === 'wainola' && (
+          <Grid>
+            {[
+              { name: 'Su-to', key: 'weekDays' },
+              { name: 'Pe-la', key: 'weekend' }
+            ].map(day => (
+              <Grid.Row key={day.key}>
+                <Grid.Column width={3} style={{ marginLeft: 10 }}>
+                  {day.name}
+                </Grid.Column>
+                <Grid.Column width={10}>{getObject('wainola')[day.key]} € + alv</Grid.Column>
+              </Grid.Row>
+            ))}
+          </Grid>
+        )}
+        <Form.Radio
+          label={getObject('ilmanTiloja').fi}
+          value="ilmanTiloja"
+          checked={values.locationType === 'ilmanTiloja'}
+          onChange={(e, data) => handleOnRadioChange(e, data, 'locationType')}
+        />
+        <Form.Radio
+          label={`${getObject('haltia').fi} (max 200 hlöä)`}
+          value="haltia"
+          checked={values.locationType === 'haltia'}
+          onChange={(e, data) => handleOnRadioChange(e, data, 'locationType')}
+        />
+      </React.Fragment>
     </React.Fragment>
   );
 };

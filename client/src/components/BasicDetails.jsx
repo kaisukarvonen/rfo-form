@@ -1,23 +1,39 @@
 import React from 'react';
-import { Form as SemanticForm, Popup, Message, Header } from 'semantic-ui-react';
+import { Form as SemanticForm, Popup, Message, Header, Divider } from 'semantic-ui-react';
 import 'moment/locale/fi';
 import DatePicker from './DatePicker';
 
-const BasicDetails = ({ formData, dateToStr, getObject, handleOnChange, handleDayClick, popupOpen, toggleDatePicker }) => {
+const BasicDetails = ({
+  formData,
+  dateToStr,
+  getObject,
+  handleOnChange,
+  handleDayClick,
+  popupOpen,
+  toggleDatePicker,
+  getObjectInList
+}) => {
   const timeOptions = () => {
-    const options = ['08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18'].map(time => ({
-      key: time,
-      value: time,
-      text: `${time}:00`
-    }));
+    const options = new Array(17).fill(null).map((val, i) => {
+      const time = 8 + i;
+      return {
+        key: time,
+        value: time,
+        text: `${time}:00`
+      };
+    });
     return options;
+  };
+
+  const padded = {
+    marginBottom: 8
   };
 
   const { from, to } = formData;
   const dateValue = dateToStr(from, to);
   return (
     <React.Fragment>
-      <Header as="h4" dividing style={{ marginTop: 16 }}>
+      <Header as="h3" dividing style={{ marginTop: 16 }}>
         Täytä yhteystiedot ja vierailusi ajankohta
       </Header>
       <SemanticForm.Group widths="equal">
@@ -25,10 +41,9 @@ const BasicDetails = ({ formData, dateToStr, getObject, handleOnChange, handleDa
         <SemanticForm.Input required label={getObject('email').fi} id="email" onChange={handleOnChange} />
       </SemanticForm.Group>
       <SemanticForm.Group widths="equal">
-        <SemanticForm.Input label={getObject('phone').fi} id="phone" onChange={handleOnChange} />
+        <SemanticForm.Input label={getObject('phone').fi} id="phone" type="telsett" onChange={handleOnChange} />
         <SemanticForm.Input label={getObject('address').fi} id="address" onChange={handleOnChange} />
       </SemanticForm.Group>
-
       <SemanticForm.Group>
         <Popup
           flowing
@@ -108,16 +123,26 @@ const BasicDetails = ({ formData, dateToStr, getObject, handleOnChange, handleDa
           onChange={handleOnChange}
         />
       </SemanticForm.Group>
-
       {formData.type === 'private' && (
-        <React.Fragment>
-          <Message>
-            <Message.Content>{getObject('acommodationInfo').summer.fi}</Message.Content>
-          </Message>
-          <Message>
-            <Message.Content>{getObject('acommodationInfo').winter.fi}</Message.Content>
-          </Message>
-        </React.Fragment>
+        <Message>
+          <Message.Header>Kesäkausi (touko-lokakuu)</Message.Header>
+          <Message.Content style={padded}>
+            5 huonetta /12 hlöä /vrk {getObject('acommodationPrices').summer['1']} €, lisäksi 2 hlön huone mökissä{' '}
+            {getObjectInList('extraPersons', 'cottage').summer['1']} €/vrk
+            <br />
+            Lisäpäivät {getObject('acommodationPrices').summer['2']} €, lisähuone{' '}
+            {getObjectInList('extraPersons', 'cottage').summer['2']} €/vrk
+          </Message.Content>
+          <Message.Header>Talvikausi (marras-huhtikuu)</Message.Header>
+          <Message.Content style={padded}>
+            2 huonetta /6 hlöä /vrk {getObject('acommodationPrices').winter['1']} €, lisäksi mökeissä 4 huonetta{' '}
+            {getObjectInList('extraPersons', 'cottage').winter['1']} €/huone
+            <br />
+            Lisäpäivät {getObject('acommodationPrices').winter['2']} €, lisähuone{' '}
+            {getObjectInList('extraPersons', 'cottage').winter['2']} €/vrk
+          </Message.Content>
+          Joulu ja Uusivuosi kesähinnoittelun mukaan. Hinta sisältää klo 16-12 välisen oleskelun.
+        </Message>
       )}
     </React.Fragment>
   );

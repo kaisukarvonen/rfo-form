@@ -7,19 +7,21 @@ import Extras from './Extras';
 import PrivatePersonForm from './PrivatePersonForm';
 import createHTML from './Template';
 import { validEmail } from '../utils';
-import DatePicker from './DatePicker';
 import BasicDetails from './BasicDetails';
 
 const initialForm = {
-  type: 'private',
+  type: 'company',
   from: undefined,
   to: undefined,
   personAmount: 1,
   activeIndex: 0,
   disabledDays: [],
   moreInformation: '',
-  cottages: []
+  cottages: [],
+  activities: []
 };
+
+const showPrice = false;
 
 const specialDates = [
   { date: 24, month: 12 },
@@ -123,12 +125,14 @@ const Form = ({ fields, sendMail }) => {
 
   const calculatePrice = () => {
     // alvPrice
+    if (!showPrice) {
+      return;
+    }
     const priceField = formData.type === 'company' ? 'price' : 'alvPrice';
     let price = 0;
     const { linen, towels, hottub, meetingType, to, from, type, cottages, cleaning, petFee, laavu, recreationType } = formData;
 
     price = meetingType ? getObjectInList('meetingOptions', formData.meetingType).price : 0;
-    price = recreationType ? getObjectInList('recreationOptions', formData.recreationType).price : 0;
     price +=
       (linen ? getObject('linen')[priceField] * formData.personAmount : 0) +
       (towels ? getObject('towels')[priceField] * formData.personAmount : 0) +
@@ -144,14 +148,6 @@ const Form = ({ fields, sendMail }) => {
       if (from && to) {
         numOfNights = moment(to).diff(moment(from), 'days');
       }
-      // activePeriod = [9, 10, 11, 0, 1, 2, 3].includes(from.getMonth()) ? 'winter' : 'summer';
-      const strFrom = { date: from.getDate(), month: from.getMonth() + 1 };
-      specialDates.forEach(date => {
-        if (JSON.stringify(date) === JSON.stringify(strFrom)) {
-          // for special dates summer peak prices are valid
-          // activePeriod = 'summer';
-        }
-      });
       price +=
         numOfNights < 2
           ? getObject('acommodationPrices')[activePeriod]['1']
@@ -362,7 +358,7 @@ const Form = ({ fields, sendMail }) => {
       </div>
       <Container style={{ margin: '40px 0', flexGrow: 1 }}>
         <SemanticForm style={{ margin: '0 5%' }} noValidate="novalidate">
-          <Grid columns={4} centered>
+          <Grid columns={4} centered stackable doubling>
             {[
               { text: 'Yritysasiakas', type: 'company' },
               { text: 'Yksityisasiakas', type: 'private' }
@@ -381,12 +377,12 @@ const Form = ({ fields, sendMail }) => {
                 formData={formData}
                 popupOpen={popupOpen}
                 getObject={getObject}
+                getObjectInList={getObjectInList}
                 handleDayClick={handleDayClick}
                 handleOnChange={handleOnChange}
                 toggleDatePicker={toggleDatePicker}
                 dateToStr={dateToStr}
               />
-
               {Object.values(errors).some(Boolean) && (
                 <Message negative>
                   {Object.keys(errors).map(errorKey => errors[errorKey] && <Message.Content>{errors[errorKey]}</Message.Content>)}
@@ -414,24 +410,29 @@ const Form = ({ fields, sendMail }) => {
                 )
               )}
               <Extras getObject={getObject} showInfo={showInfo} values={formData} handleOnChange={handleOnChange} />
-
               <SemanticForm.TextArea
                 rows={3}
                 autoHeight
-                label={'Lisätietoja tarjouspyyntöön'}
+                label="Lisätietoja tarjouspyyntöön"
                 value={formData.moreInformation}
                 id="moreInformation"
                 onChange={handleOnChange}
               />
 
-              <Header as="h4" dividing>
-                {getObject('priceTitle').fi}
-              </Header>
+              {showPrice && (
+                <Header as="h4" dividing>
+                  Alustava hinta
+                </Header>
+              )}
               <p>
-                {`Alustava hinta ${
-                  formData.type === 'company' ? '(alv 0%)' : ''
-                } sisältäen hinnoitellut palvelut: ${calculatePrice()} €`}
-                <br />
+                {showPrice && (
+                  <React.Fragment>
+                    {`Alustava hinta ${
+                      formData.type === 'company' ? '(alv 0%)' : ''
+                    } sisältäen hinnoitellut palvelut: ${calculatePrice()} €`}
+                    <br />
+                  </React.Fragment>
+                )}
                 Tarjoilujen ja ohjelmien hinnat määräytyvät saatavuuden mukaan. Pidätämme oikeuden muutoksiin.
               </p>
 
