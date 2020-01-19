@@ -11,7 +11,10 @@ const BasicDetails = ({
   handleDayClick,
   popupOpen,
   toggleDatePicker,
-  getObjectInList
+  getObjectInList,
+  disabledDays,
+  availableFrom16,
+  availableUntil12
 }) => {
   const timeOptions = () => {
     const options = new Array(17).fill(null).map((val, i) => {
@@ -28,8 +31,23 @@ const BasicDetails = ({
   const padded = {
     marginBottom: 8
   };
-
   const { from, to } = formData;
+
+  const renderDatePicker = (className, compact) => (
+    <DatePicker
+      className={className}
+      from={from}
+      compact={compact}
+      to={to}
+      handleDayClick={handleDayClick}
+      until12Info={formData.until12Info}
+      from16Info={formData.from16Info}
+      disabledDays={disabledDays}
+      availableFrom16={availableFrom16}
+      availableUntil12={availableUntil12}
+    />
+  );
+
   const dateValue = dateToStr(from, to);
   return (
     <React.Fragment>
@@ -64,23 +82,8 @@ const BasicDetails = ({
           }
           content={
             <React.Fragment>
-              <DatePicker
-                className="hide-mobile"
-                from={from}
-                to={to}
-                handleDayClick={handleDayClick}
-                until12Info={formData.until12Info}
-                from16Info={formData.from16Info}
-              />
-              <DatePicker
-                className="hide-fullscreen"
-                compact
-                from={from}
-                to={to}
-                handleDayClick={handleDayClick}
-                until12Info={formData.until12Info}
-                from16Info={formData.from16Info}
-              />
+              {renderDatePicker('hide-mobile')}
+              {renderDatePicker('hide-fullscreen', true)}
             </React.Fragment>
           }
         />

@@ -17,7 +17,7 @@ function createHTML(data, title, description, moreInformation) {
               data[innerObject][key] && (
                 <Item key={ind}>
                   <Span fontSize={13}>
-                    <b>{`${key}`}</b>
+                    <b>{key}</b>
                     <br />
                   </Span>
                   <Span fontSize={13}>{data[innerObject][key]}</Span>

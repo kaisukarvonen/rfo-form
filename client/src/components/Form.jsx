@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Header, Form as SemanticForm, Popup, Message, Grid, Button } from 'semantic-ui-react';
+import { Container, Header, Form as SemanticForm, Message, Grid, Button } from 'semantic-ui-react';
 import 'moment/locale/fi';
 import moment from 'moment';
 import CompanyForm from './CompanyForm';
 import Extras from './Extras';
 import PrivatePersonForm from './PrivatePersonForm';
 import createHTML from './Template';
-import { validEmail } from '../utils';
+import { validEmail, showInfo } from '../utils';
 import BasicDetails from './BasicDetails';
 
 const initialForm = {
@@ -28,7 +28,7 @@ const specialDates = [
   { date: 31, month: 12 }
 ];
 
-const Form = ({ fields, sendMail }) => {
+const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil12 }) => {
   const [formData, setFormData] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [popupOpen, setPopup] = useState(false);
@@ -190,113 +190,6 @@ const Form = ({ fields, sendMail }) => {
     return fieldsFilled && isValidEmail;
   };
 
-  const createMail = () => {
-    if (isValid()) {
-      const strDates = dateToStr(formData.from, formData.to);
-      const title = `Tarjouspyyntö ${strDates}`;
-      let description = `Tarjouspyyntö ajalle ${strDates} henkilöltä ${formData.name} `;
-      const html = createHTML(createDataFields(), title, description, formData.moreInformation);
-      sendMail(formData.email, title, html);
-    }
-    window.scrollTo(0, 0);
-  };
-
-  const createDataFields = () => {
-    const data = formData;
-    const basicInfo = {
-      title: getObject('contactDetails').fi,
-      [getObject('name').fi]: data.name,
-      [getObject('email').fi]: data.email,
-      [getObject('phone').fi]: data.phone,
-      [getObject('address').fi]: data.address,
-      [getObject('dates').fi]: dateToStr(data.from, data.to),
-      [getObject('arrivalTime').fi]: `klo ${data.arrivalTime}`,
-      [getObject('departTime').fi]: `klo ${data.departTime}`,
-      [getObject('personAmount').fi]: data.personAmount,
-      Asiakastyyppi: getObject(data.type).fi,
-      Hinta: `${calculatePrice()} €`
-    };
-    const extraPersons = { title: 'Lisähenkilöt' };
-    getObject('extraPersons').options.forEach(ac => {
-      if (ac.key === 'cottage') {
-        let cottages = '';
-        data.cottages.forEach((val, i) => {
-          if (val) {
-            cottages += `${ac.choices[i]} hlön huone, `;
-          }
-        });
-        extraPersons['Huoneet mökissä'] = !!cottages ? cottages : undefined;
-      } else {
-        extraPersons[ac.fi] = !!data[ac.key];
-      }
-    });
-
-    const priceField = formData.type === 'company' ? 'price' : 'alvPrice';
-
-    const food = { title: 'Tarjoilut' };
-    getObject('foodOptions').options.forEach(ac => {
-      food[getObjectInList('foodOptions', ac.key).fi] = !!data[ac.key];
-    });
-
-    const activities = { title: 'Aktiviteetit ja ohjelmat' };
-    getObject('allYearRound').options.forEach(ac => {
-      activities[getObjectInList('allYearRound', ac.key).fi] = !!data[ac.key];
-    });
-    getObject('summer').options.forEach(ac => {
-      activities[getObjectInList('summer', ac.key).fi] = !!data[ac.key];
-    });
-    getObject('winter').options.forEach(ac => {
-      activities[getObjectInList('winter', ac.key).fi] = !!data[ac.key];
-    });
-
-    getObject('rentalEquipment').options.forEach(rental => {
-      const field = getObjectInList('rentalEquipment', rental.key);
-      const price = field[priceField] || field.alvPrice;
-      activities[`${field.fi} ${price ? `( ${price} € )` : ''}`] = !!data[rental.key];
-    });
-
-    const services = ['linen', 'towels', 'hottub', 'cleaning', 'laavu', 'petFee'];
-    const extraServices = { title: 'Lisäpalvelut' };
-    services.forEach(s => {
-      const field = getObject(s);
-      const price = field[priceField] || field.alvPrice;
-      extraServices[`${field.fi} ${price ? `( ${price} € )` : ''}`] = !!data[s];
-    });
-    getObject('meetingEquipment').options.forEach(ac => {
-      extraServices[getObjectInList('meetingEquipment', ac.key).fi] = !!data[ac.key];
-    });
-
-    const visitDetails = { title: 'Vierailun lisätiedot' };
-    const details = ['companyName', 'visitType', 'visitTypeString', 'meetingType', 'locationType', 'recreationType'];
-    details.forEach(d => {
-      if (data[d]) {
-        if (d === 'meetingType') {
-          const object = getObjectInList('meetingOptions', data[d]);
-          visitDetails['Kokouksen tyyppi'] = `${object.fi} - ${object.duration}h`;
-        } else if (d === 'recreationType') {
-          const object = getObjectInList('recreationOptions', data[d]);
-          visitDetails['Virkistyspäivän tyyppi'] = `${object.fi} - ${object.duration}h`;
-        } else if (d === 'visitType') {
-          visitDetails['Vierailun tyyppi'] = getObject(data.visitType).fi;
-        } else if (d === 'visitTypeString') {
-          visitDetails['Vierailun tyyppi'] = data.visitTypeString;
-        } else if (d === 'locationType') {
-          visitDetails.Tilat = getObject(data[d]).fi;
-        } else {
-          visitDetails[getObject(d).fi] = data[d];
-        }
-      }
-    });
-    return {
-      basicInfo,
-      food,
-      extraPersons,
-      activities,
-      extraServices,
-      visitDetails
-    };
-  };
-
   const dateToStr = (from, to) => {
     if (from && to) {
       const diff = moment(to).diff(moment(from), 'days');
@@ -321,31 +214,105 @@ const Form = ({ fields, sendMail }) => {
     return '';
   };
 
+  const createDataFields = () => {
+    const data = formData;
+    const basicInfo = {
+      title: getObject('contactDetails').fi,
+      [getObject('name').fi]: data.name,
+      [getObject('email').fi]: data.email,
+      [getObject('phone').fi]: <a href={`tel:${data.phone}`}>{data.phone}</a>,
+      [getObject('address').fi]: data.address,
+      [getObject('dates').fi]: dateToStr(data.from, data.to),
+      [getObject('arrivalTime').fi]: `klo ${data.arrivalTime}`,
+      [getObject('departTime').fi]: `klo ${data.departTime}`,
+      [getObject('personAmount').fi]: data.personAmount,
+      Asiakastyyppi: getObject(data.type).fi
+    };
+    if (showPrice) {
+      basicInfo.Hinta = `${calculatePrice()} €`;
+    }
+    const extraPersons = { title: 'Lisähenkilöt' };
+    getObject('extraPersons').options.forEach(ac => {
+      if (ac.key === 'cottage') {
+        let cottages = '';
+        data.cottages.forEach((val, i) => {
+          if (val) {
+            cottages += `${ac.choices[i]} hlön huone, `;
+          }
+        });
+        extraPersons['Huoneet mökissä'] = !!cottages && cottages;
+      } else {
+        extraPersons[ac.fi] = !!data[ac.key];
+      }
+    });
+
+    const priceField = formData.type === 'company' ? 'price' : 'alvPrice';
+
+    const food = { title: 'Tarjoilut' };
+    getObject('foodOptions').options.forEach(ac => {
+      food[getObjectInList('foodOptions', ac.key).fi] = !!data[ac.key];
+    });
+
+    const activities = { title: 'Aktiviteetit ja ohjelmat' };
+    activities[data.activities.join(', ')] = true;
+
+    getObject('rentalEquipment').options.forEach(rental => {
+      const field = getObjectInList('rentalEquipment', rental.key);
+      const price = field[priceField] || field.alvPrice;
+      activities[`${field.fi} ${price ? `(${price} €)` : ''}`] = !!data[rental.key];
+    });
+
+    const services = ['linen', 'towels', 'hottub', 'cleaning', 'laavu', 'petFee'];
+    const extraServices = { title: 'Lisäpalvelut' };
+    services.forEach(s => {
+      const field = getObject(s);
+      const price = field[priceField] || field.alvPrice;
+      extraServices[`${field.fi} ${price ? `( ${price} € )` : ''}`] = !!data[s];
+    });
+    getObject('meetingEquipment').options.forEach(ac => {
+      extraServices[getObjectInList('meetingEquipment', ac.key).fi] = !!data[ac.key];
+    });
+
+    const visitDetails = { title: 'Vierailun lisätiedot' };
+    let visitString;
+    if (data.meetingType) {
+      const object = getObjectInList('meetingOptions', data.meetingType);
+      visitString = `${object.fi} - ${object.duration}h`;
+    } else if (data.visitType) {
+      visitString = getObject(data.visitType).fi;
+    }
+
+    visitDetails['Vierailun tyyppi'] = visitString || data.visitTypeString;
+    visitDetails.Tilat = data.locationType && getObject(data.locationType).fi;
+    visitDetails['Yrityksen nimi'] = data.companyName;
+    return {
+      basicInfo,
+      food,
+      extraPersons,
+      activities,
+      extraServices,
+      visitDetails
+    };
+  };
+
+  const createMail = () => {
+    console.log(createDataFields());
+    if (isValid()) {
+      const strDates = dateToStr(formData.from, formData.to);
+      const title = `Tarjouspyyntö ${strDates}`;
+      const description = `Tarjouspyyntö ajalle ${strDates} henkilöltä ${formData.name} `;
+      const html = createHTML(createDataFields(), title, description, formData.moreInformation);
+      sendMail(formData.email, title, html);
+    }
+    window.scrollTo(0, 0);
+  };
+
   const setType = type => {
     setFormData({ ...formData, type });
   };
 
   const cottageOptions = period => {
     return new Array(getObjectInList('extraPersons', 'cottage')[period].choices.length).fill(false);
-  };
-
-  const showInfo = object => {
-    let info = object.infoFi;
-    if (info && info.includes('*s_link*')) {
-      const link = '*s_link*';
-      const address = info.substring(info.indexOf(link) + link.length, info.indexOf('*e_link*'));
-      const linkName = info.substring(info.indexOf('*s_text*') + link.length, info.indexOf('*e_text*'));
-      info = (
-        <span>
-          {info.substring(0, info.indexOf(link))}
-          <a href={address.includes('http') ? address : `http://${address}`} target="blank">
-            {linkName}
-          </a>
-          {info.substring(info.indexOf('*e_text*') + link.length)}
-        </span>
-      );
-    }
-    return info;
   };
 
   return (
@@ -381,6 +348,9 @@ const Form = ({ fields, sendMail }) => {
                 handleDayClick={handleDayClick}
                 handleOnChange={handleOnChange}
                 toggleDatePicker={toggleDatePicker}
+                disabledDays={disabledDays}
+                availableUntil12={availableUntil12}
+                availableFrom16={availableFrom16}
                 dateToStr={dateToStr}
               />
               {Object.values(errors).some(Boolean) && (

@@ -12,6 +12,7 @@
     "max-len": "off",
     "react/sort-comp": "off",
     "react/prop-types": "off",
-    "react/no-array-index-key": "off"
+    "react/no-array-index-key": "off",
+    "react/jsx-filename-extension": "off"
   }
 }
