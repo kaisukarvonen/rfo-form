@@ -1,9 +1,9 @@
 import React, { Fragment, useState } from 'react';
-import { Header, Form, Divider, Icon, Grid, Accordion } from 'semantic-ui-react';
+import { Header, Form, Icon, Grid, Accordion, Checkbox } from 'semantic-ui-react';
 import CustomAccordion from './CustomAccordion';
 
 const Extras = ({ values, getObject, showInfo, handleOnChange }) => {
-  const [accordions, setAccordions] = useState([9, 3]);
+  const [accordions, setAccordions] = useState([5]);
 
   const handleAccordionClick = (e, titleProps) => {
     const { index } = titleProps;
@@ -27,11 +27,23 @@ const Extras = ({ values, getObject, showInfo, handleOnChange }) => {
     return `kesällä ${object.summer} €, talvella huvila ${object.winter.villa} € + ${object.winter.cottage} € / huone mökissä`;
   };
 
+  const onActivitiesChange = (key, checked) => {
+    const newArray = [...values.activities];
+    if (!checked) {
+      newArray.splice(newArray.indexOf(key), 1);
+    } else {
+      newArray.push(key);
+    }
+    handleOnChange(undefined, { id: 'activities', value: newArray });
+  };
+
   return (
     <Fragment>
-      <Divider />
+      <Header as="h3" dividing>
+        Valitse haluamasi palvelut
+      </Header>
 
-      {values.visitType === 'meeting' && (
+      {values.type === 'company' && (
         <CustomAccordion
           values={values}
           accordions={accordions}
@@ -62,47 +74,42 @@ const Extras = ({ values, getObject, showInfo, handleOnChange }) => {
         <Accordion.Title active={accordions.includes(3)} index={3} onClick={handleAccordionClick}>
           <Header as="h4">
             <Icon name="dropdown" />
-            {getObject('programs').fi}
+            Ohjelmat
           </Header>
         </Accordion.Title>
         <Accordion.Content active={accordions.includes(3)}>
-          <CustomAccordion
-            small
-            values={values}
-            accordions={accordions}
-            handleOnChange={handleOnChange}
-            handleAccordionClick={handleAccordionClick}
-            showInfo={showInfo}
-            getObject={getObject}
-            title="summer"
-            index={4}
-            options={getObject('allYearRound').options.concat(getObject('summer').options)}
-          />
-          <CustomAccordion
-            small
-            values={values}
-            accordions={accordions}
-            handleOnChange={handleOnChange}
-            handleAccordionClick={handleAccordionClick}
-            showInfo={showInfo}
-            getObject={getObject}
-            title="winter"
-            index={5}
-            options={getObject('allYearRound').options.concat(getObject('winter').options)}
-          />
+          <Grid stackable>
+            {getObject('activities').options.map((activitySet, i) => (
+              <Grid.Column key={`activities-${i}`} width={4}>
+                {[activitySet.title, ...activitySet.options].map((activity, innerIndex) => (
+                  <Grid.Row key={`activities-${i}-${innerIndex}`}>
+                    <Form.Field inline>
+                      <Checkbox
+                        style={!innerIndex ? { fontWeight: 600, fontSize: '1.3rem' } : null}
+                        label={activity}
+                        id={`activities-${i}-${innerIndex}`}
+                        checked={values.activities.includes(activity)}
+                        onChange={(e, data) => onActivitiesChange(activity, data.checked)}
+                      />
+                    </Form.Field>
+                  </Grid.Row>
+                ))}
+              </Grid.Column>
+            ))}
+          </Grid>
         </Accordion.Content>
       </Accordion>
 
       {(!values.locationType || values.locationType === 'villaParatiisi') && (
         <Fragment>
           <Accordion>
-            <Accordion.Title active={accordions.includes(8)} index={8} onClick={handleAccordionClick}>
+            <Accordion.Title active={accordions.includes(4)} index={4} onClick={handleAccordionClick}>
               <Header as="h4">
                 <Icon name="dropdown" />
                 {getObject('rentalEquipment').fi}
               </Header>
             </Accordion.Title>
-            <Accordion.Content active={accordions.includes(8)}>
+            <Accordion.Content active={accordions.includes(4)}>
               <Grid style={{ marginBottom: '1px' }}>
                 {getObject('rentalEquipment').options.map(i => (
                   <Grid.Row key={i.key}>
@@ -117,13 +124,13 @@ const Extras = ({ values, getObject, showInfo, handleOnChange }) => {
           </Accordion>
 
           <Accordion>
-            <Accordion.Title active={accordions.includes(9)} index={9} onClick={handleAccordionClick}>
+            <Accordion.Title active={accordions.includes(5)} index={5} onClick={handleAccordionClick}>
               <Header as="h4">
                 <Icon name="dropdown" />
                 {getObject('extraServices').fi}
               </Header>
             </Accordion.Title>
-            <Accordion.Content active={accordions.includes(9)}>
+            <Accordion.Content active={accordions.includes(5)}>
               <Grid style={{ marginBottom: '1px' }}>
                 <Grid.Column width={9} style={{ maxWidth: '270px' }}>
                   <Form.Checkbox label={getObject('linen').fi} id="linen" checked={values.linen} onChange={handleOnChange} />

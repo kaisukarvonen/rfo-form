@@ -16,6 +16,7 @@ const CustomAccordion = ({
   handleAccordionClick
 }) => {
   const displayOptions = options || getObject(title).options;
+
   return (
     <Accordion>
       <Accordion.Title active={accordions.includes(index)} index={index} onClick={handleAccordionClick}>
@@ -28,10 +29,14 @@ const CustomAccordion = ({
         {displayOptions.map(i => (
           <React.Fragment key={i.key}>
             <Form.Field inline>
-              <Checkbox label={i.fi} id={i.key} checked={values[i.key]} onChange={handleOnChange} />
+              <Checkbox
+                label={i.fi}
+                id={i.key}
+                checked={values[i.key]}
+                onChange={(e, data) => handleOnChange(e, { ...data, id: i.key })}
+              />
               {showInfo(i) && <InfoPopup icon="info circle" content={showInfo(i)} />}
             </Form.Field>
-            {i.spaceAfter && <br />}
           </React.Fragment>
         ))}
         <p>{extraInfo && extraInfo}</p>

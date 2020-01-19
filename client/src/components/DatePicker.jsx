@@ -1,38 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import MomentLocaleUtils from 'react-day-picker/moment';
 import DayPicker from 'react-day-picker';
 import { Label } from 'semantic-ui-react';
 import 'moment/locale/fi';
-import { getCalendarEvents, formatDates } from '../utils';
 
-const DatePicker = ({ handleDayClick, from, to, until12Info, from16Info, compact, className, calendarOnly }) => {
-  const [disabledDays, setDisabledDays] = useState([]);
-  const [availableFrom16, setAvailableFrom16] = useState([]);
-  const [availableUntil12, setAvailableUntil12] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getCalendarEvents().then(response => {
-      const { disabledDays, from16, until12 } = formatDates(response.data.items);
-      setDisabledDays(disabledDays);
-      setAvailableFrom16(from16);
-      setAvailableUntil12(until12);
-      setLoading(false);
-    });
-  }, []);
-
+const DatePicker = ({
+  handleDayClick,
+  from,
+  disabledDays,
+  availableFrom16,
+  availableUntil12,
+  to,
+  until12Info,
+  from16Info,
+  compact,
+  className,
+  calendarOnly,
+  loading
+}) => {
   const modifiers = {
     start: from,
     end: to,
-    availableUntil12: availableUntil12,
-    availableFrom16: availableFrom16
+    availableUntil12,
+    availableFrom16
   };
 
   return (
     <div className={className || ''} style={{ opacity: loading ? 0 : 1 }}>
       <DayPicker
         localeUtils={MomentLocaleUtils}
-        locale={'fi'}
+        locale="fi"
         months={
           calendarOnly && [
             'tammi / january',
