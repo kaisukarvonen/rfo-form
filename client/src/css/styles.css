@@ -1,6 +1,19 @@
 body {
   font-size: 13px !important;
 }
+.flex-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.flex-column .ui.button {
+  margin-bottom: 4px;
+}
+
+.left-aligned {
+  display: flex;
+  justify-content: flex-end;
+}
 
 .main {
   min-height: 100vh;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Header, Form, Grid, Checkbox } from 'semantic-ui-react';
+import { Header, Form, Grid, Checkbox, Button } from 'semantic-ui-react';
 import InfoPopup from './InfoPopup';
 
 const CompanyForm = ({ getObject, values, showInfo, handleOnRadioChange, handleOnChange }) => {
@@ -45,47 +45,61 @@ const CompanyForm = ({ getObject, values, showInfo, handleOnRadioChange, handleO
       />
 
       <React.Fragment>
-        <Header as="h4">Millaisen päivän haluat viettää?</Header>
-        <Form.Radio
-          label={`${getObject('villaParatiisi').fi} - rantahuvila (max. 20 hlöä, majoitus 14 hlöä)`}
-          value="villaParatiisi"
-          checked={values.locationType === 'villaParatiisi'}
-          onChange={(e, data) => handleOnRadioChange(e, data, 'locationType')}
-        />
-        {values.locationType === 'villaParatiisi' && visitOptions('meetingOptions', 'meetingType')}
-        <Form.Radio
-          label={`${getObject('wainola').fi} - ohjelmatila päiväkäyttöön (max. 50 hlöä)`}
-          value="wainola"
-          checked={values.locationType === 'wainola'}
-          onChange={(e, data) => handleOnRadioChange(e, data, 'locationType')}
-        />
-        {values.locationType === 'wainola' && (
-          <Grid>
-            {[
-              { name: 'Su-to', key: 'weekDays' },
-              { name: 'Pe-la', key: 'weekend' }
-            ].map(day => (
-              <Grid.Row key={day.key}>
-                <Grid.Column width={3} style={{ marginLeft: 10 }}>
-                  {day.name}
-                </Grid.Column>
-                <Grid.Column width={10}>{getObject('wainola')[day.key]} € + alv</Grid.Column>
-              </Grid.Row>
-            ))}
-          </Grid>
-        )}
-        <Form.Radio
-          label={getObject('ilmanTiloja').fi}
-          value="ilmanTiloja"
-          checked={values.locationType === 'ilmanTiloja'}
-          onChange={(e, data) => handleOnRadioChange(e, data, 'locationType')}
-        />
-        <Form.Radio
-          label={`${getObject('haltia').fi} (max 200 hlöä)`}
-          value="haltia"
-          checked={values.locationType === 'haltia'}
-          onChange={(e, data) => handleOnRadioChange(e, data, 'locationType')}
-        />
+        <Header as="h3">Millaisen päivän haluat viettää?</Header>
+        <div className="flex-column">
+          <Button
+            active={values.locationType === 'villaParatiisi'}
+            compact
+            size="small"
+            basic
+            onClick={() => handleOnChange(null, { id: 'locationType', value: 'villaParatiisi' })}
+          >
+            <b>{getObject('villaParatiisi').fi}</b> - rantahuvila (max. 20 hlöä, majoitus 14 hlöä)
+          </Button>
+          {values.locationType === 'villaParatiisi' && visitOptions('meetingOptions', 'meetingType')}
+          <Button
+            active={values.locationType === 'wainola'}
+            compact
+            size="small"
+            basic
+            onClick={() => handleOnChange(null, { id: 'locationType', value: 'wainola' })}
+          >
+            <b>{getObject('wainola').fi}</b> - ohjelmatila päiväkäyttöön (max. 50 hlöä)
+          </Button>
+          {values.locationType === 'wainola' && (
+            <Grid>
+              {[
+                { name: 'Su-to', key: 'weekDays' },
+                { name: 'Pe-la', key: 'weekend' }
+              ].map(day => (
+                <Grid.Row key={day.key}>
+                  <Grid.Column width={3} style={{ marginLeft: 10 }}>
+                    {day.name}
+                  </Grid.Column>
+                  <Grid.Column width={10}>{getObject('wainola')[day.key]} € + alv</Grid.Column>
+                </Grid.Row>
+              ))}
+            </Grid>
+          )}
+          <Button
+            active={values.locationType === 'haltia'}
+            compact
+            size="small"
+            basic
+            onClick={() => handleOnChange(null, { id: 'locationType', value: 'haltia' })}
+          >
+            <b>{getObject('haltia').fi}</b> - (max 200 hlöä)
+          </Button>
+          <Button
+            active={values.locationType === 'ilmanTiloja'}
+            compact
+            size="small"
+            basic
+            onClick={() => handleOnChange(null, { id: 'locationType', value: 'ilmanTiloja' })}
+          >
+            <b>{getObject('ilmanTiloja').fi}</b>
+          </Button>
+        </div>
       </React.Fragment>
     </React.Fragment>
   );

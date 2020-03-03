@@ -3,7 +3,6 @@ import { Header, Form, Grid, Accordion, Icon } from 'semantic-ui-react';
 
 const PrivatePersonForm = ({ values, getObject, activePeriod, handleOnChange, handleOnRadioChange, handleCottageChange }) => {
   const [showExtraPersons, setShowExtraPersons] = useState(false);
-  console.log(values.cottages);
 
   return (
     <div>

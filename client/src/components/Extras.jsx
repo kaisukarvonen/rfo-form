@@ -3,7 +3,7 @@ import { Header, Form, Icon, Grid, Accordion, Checkbox } from 'semantic-ui-react
 import CustomAccordion from './CustomAccordion';
 
 const Extras = ({ values, getObject, showInfo, handleOnChange }) => {
-  const [accordions, setAccordions] = useState([5]);
+  const [accordions, setAccordions] = useState([]);
 
   const handleAccordionClick = (e, titleProps) => {
     const { index } = titleProps;

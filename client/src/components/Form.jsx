@@ -10,7 +10,8 @@ import { validEmail, showInfo } from '../utils';
 import BasicDetails from './BasicDetails';
 
 const initialForm = {
-  type: 'company',
+  // type: undefined,
+  type: 'private',
   from: undefined,
   to: undefined,
   personAmount: 1,
@@ -296,7 +297,6 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
   };
 
   const createMail = () => {
-    console.log(createDataFields());
     if (isValid()) {
       const strDates = dateToStr(formData.from, formData.to);
       const title = `Tarjouspyyntö ${strDates}`;
@@ -352,65 +352,70 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
                 availableUntil12={availableUntil12}
                 availableFrom16={availableFrom16}
                 dateToStr={dateToStr}
+                showInfo={showInfo}
+                handleOnRadioChange={handleOnRadioChange}
               />
               {Object.values(errors).some(Boolean) && (
                 <Message negative>
                   {Object.keys(errors).map(errorKey => errors[errorKey] && <Message.Content>{errors[errorKey]}</Message.Content>)}
                 </Message>
               )}
-              {formData.type === 'company' ? (
-                <CompanyForm
-                  getObject={getObject}
-                  handleOnChange={handleOnChange}
-                  handleOnRadioChange={handleOnRadioChange}
-                  values={formData}
-                  showInfo={showInfo}
-                />
-              ) : (
-                formData.cottages &&
-                activePeriod && (
-                  <PrivatePersonForm
-                    getObject={getObject}
-                    handleOnChange={handleOnChange}
-                    handleOnRadioChange={handleOnRadioChange}
-                    values={formData}
-                    handleCottageChange={handleCottageChange}
-                    activePeriod={activePeriod}
+              {formData.from && (
+                <React.Fragment>
+                  {/* {formData.type === 'company' ? (
+                    <CompanyForm
+                      getObject={getObject}
+                      handleOnChange={handleOnChange}
+                      handleOnRadioChange={handleOnRadioChange}
+                      values={formData}
+                      showInfo={showInfo}
+                    />
+                  ) : (
+                    formData.cottages &&
+                    activePeriod && (
+                      <PrivatePersonForm
+                        getObject={getObject}
+                        handleOnChange={handleOnChange}
+                        handleOnRadioChange={handleOnRadioChange}
+                        values={formData}
+                        handleCottageChange={handleCottageChange}
+                        activePeriod={activePeriod}
+                      />
+                    )
+                  )} */}
+                  <Extras getObject={getObject} showInfo={showInfo} values={formData} handleOnChange={handleOnChange} />
+                  <SemanticForm.TextArea
+                    rows={3}
+                    autoHeight
+                    label="Lisätietoja tarjouspyyntöön"
+                    value={formData.moreInformation}
+                    id="moreInformation"
+                    onChange={handleOnChange}
                   />
-                )
+                  {showPrice && (
+                    <Header as="h4" dividing>
+                      Alustava hinta
+                    </Header>
+                  )}
+                  <p>
+                    {showPrice && (
+                      <React.Fragment>
+                        {`Alustava hinta ${
+                          formData.type === 'company' ? '(alv 0%)' : ''
+                        } sisältäen hinnoitellut palvelut: ${calculatePrice()} €`}
+                        <br />
+                      </React.Fragment>
+                    )}
+                    Tarjoilujen ja ohjelmien hinnat määräytyvät saatavuuden mukaan. Pidätämme oikeuden muutoksiin.
+                  </p>
+
+                  <Message>
+                    <Message.Content>{getObject('paymentInfo')[formData.type].fi}</Message.Content>
+                  </Message>
+
+                  <SemanticForm.Button primary content="Lähetä" onClick={createMail} />
+                </React.Fragment>
               )}
-              <Extras getObject={getObject} showInfo={showInfo} values={formData} handleOnChange={handleOnChange} />
-              <SemanticForm.TextArea
-                rows={3}
-                autoHeight
-                label="Lisätietoja tarjouspyyntöön"
-                value={formData.moreInformation}
-                id="moreInformation"
-                onChange={handleOnChange}
-              />
-
-              {showPrice && (
-                <Header as="h4" dividing>
-                  Alustava hinta
-                </Header>
-              )}
-              <p>
-                {showPrice && (
-                  <React.Fragment>
-                    {`Alustava hinta ${
-                      formData.type === 'company' ? '(alv 0%)' : ''
-                    } sisältäen hinnoitellut palvelut: ${calculatePrice()} €`}
-                    <br />
-                  </React.Fragment>
-                )}
-                Tarjoilujen ja ohjelmien hinnat määräytyvät saatavuuden mukaan. Pidätämme oikeuden muutoksiin.
-              </p>
-
-              <Message>
-                <Message.Content>{getObject('paymentInfo')[formData.type].fi}</Message.Content>
-              </Message>
-
-              <SemanticForm.Button primary content="Lähetä" onClick={createMail} />
             </React.Fragment>
           )}
         </SemanticForm>
