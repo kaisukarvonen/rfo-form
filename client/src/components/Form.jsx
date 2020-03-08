@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Container, Header, Form as SemanticForm, Message, Grid, Button } from 'semantic-ui-react';
 import 'moment/locale/fi';
 import moment from 'moment';
-import CompanyForm from './CompanyForm';
 import Extras from './Extras';
-import PrivatePersonForm from './PrivatePersonForm';
 import createHTML from './Template';
 import { validEmail, showInfo } from '../utils';
 import BasicDetails from './BasicDetails';
@@ -81,9 +79,11 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
 
   const handleDayClick = (day, modifiers) => {
     let { to, from } = formData;
-    if (!from) {
+    const notVilla = formData.locationType !== 'villaParatiisi';
+    if (!from || notVilla) {
       from = day;
     } else if (!to) {
+      // to = day;
       to = day;
     }
     if (to && from) {
@@ -121,6 +121,9 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
         from16Info: modifiers.availableFrom16,
         cottages
       });
+      if (notVilla) {
+        toggleDatePicker();
+      }
     }
   };
 
@@ -205,7 +208,7 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
         ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}`
         : moment(from).format('DD.MM.YYYY');
     } else if (from && !to) {
-      if (formData.type !== 'company') {
+      if (formData.type !== 'company' && formData.locationType === 'villaParatiisi') {
         return `${moment(from).format('DD.MM.YYYY')} - ${moment(from)
           .add(1, 'days')
           .format('DD.MM.YYYY')}`;
@@ -339,7 +342,7 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
           </Grid>
 
           {formData.type && (
-            <React.Fragment>
+            <>
               <BasicDetails
                 formData={formData}
                 popupOpen={popupOpen}
@@ -354,6 +357,8 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
                 dateToStr={dateToStr}
                 showInfo={showInfo}
                 handleOnRadioChange={handleOnRadioChange}
+                handleCottageChange={handleCottageChange}
+                activePeriod={activePeriod}
               />
               {Object.values(errors).some(Boolean) && (
                 <Message negative>
@@ -361,28 +366,7 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
                 </Message>
               )}
               {formData.from && (
-                <React.Fragment>
-                  {/* {formData.type === 'company' ? (
-                    <CompanyForm
-                      getObject={getObject}
-                      handleOnChange={handleOnChange}
-                      handleOnRadioChange={handleOnRadioChange}
-                      values={formData}
-                      showInfo={showInfo}
-                    />
-                  ) : (
-                    formData.cottages &&
-                    activePeriod && (
-                      <PrivatePersonForm
-                        getObject={getObject}
-                        handleOnChange={handleOnChange}
-                        handleOnRadioChange={handleOnRadioChange}
-                        values={formData}
-                        handleCottageChange={handleCottageChange}
-                        activePeriod={activePeriod}
-                      />
-                    )
-                  )} */}
+                <>
                   <Extras getObject={getObject} showInfo={showInfo} values={formData} handleOnChange={handleOnChange} />
                   <SemanticForm.TextArea
                     rows={3}
@@ -399,12 +383,12 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
                   )}
                   <p>
                     {showPrice && (
-                      <React.Fragment>
+                      <>
                         {`Alustava hinta ${
                           formData.type === 'company' ? '(alv 0%)' : ''
                         } sisältäen hinnoitellut palvelut: ${calculatePrice()} €`}
                         <br />
-                      </React.Fragment>
+                      </>
                     )}
                     Tarjoilujen ja ohjelmien hinnat määräytyvät saatavuuden mukaan. Pidätämme oikeuden muutoksiin.
                   </p>
@@ -414,9 +398,9 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
                   </Message>
 
                   <SemanticForm.Button primary content="Lähetä" onClick={createMail} />
-                </React.Fragment>
+                </>
               )}
-            </React.Fragment>
+            </>
           )}
         </SemanticForm>
       </Container>

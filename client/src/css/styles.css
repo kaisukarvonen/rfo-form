@@ -77,6 +77,15 @@ body {
   padding: 0.2em !important;
 }
 
+.ui.grid.extra-persons > .row {
+  align-items: center;
+  margin-bottom: 3px;
+}
+
+.ui.grid.extra-persons > .row > .column .field {
+  margin: 0;
+}
+
 .ui.selection.dropdown > .delete.icon,
 .ui.selection.dropdown > .dropdown.icon,
 .ui.selection.dropdown > .search.icon {

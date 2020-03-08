@@ -1,8 +1,10 @@
-import React from 'react';
-import { Form as SemanticForm, Popup, Message, Header, Divider, Icon } from 'semantic-ui-react';
+import React, { useState } from 'react';
+import { Form as SemanticForm, Popup, Message, Header, Accordion, Form, Grid, Icon } from 'semantic-ui-react';
 import 'moment/locale/fi';
 import DatePicker from './DatePicker';
 import CompanyForm from './CompanyForm';
+import PrivatePersonForm from './PrivatePersonForm';
+import PrivateAccommodation from './PrivateAccommodation';
 
 const BasicDetails = ({
   formData,
@@ -17,7 +19,9 @@ const BasicDetails = ({
   availableFrom16,
   availableUntil12,
   showInfo,
-  handleOnRadioChange
+  handleOnRadioChange,
+  handleCottageChange,
+  activePeriod
 }) => {
   const timeOptions = () => {
     const options = new Array(17).fill(null).map((val, i) => {
@@ -55,7 +59,7 @@ const BasicDetails = ({
   const isCompany = formData.type === 'company';
   const dateValue = dateToStr(from, to);
   return (
-    <React.Fragment>
+    <>
       <Header as="h3" dividing style={{ marginTop: 16 }}>
         Täytä yhteystiedot ja vierailusi ajankohta
       </Header>
@@ -68,9 +72,14 @@ const BasicDetails = ({
         <SemanticForm.Input label={getObject('address').fi} id="address" onChange={handleOnChange} />
       </SemanticForm.Group>
       {isPrivate && (
-        <React.Fragment>
-          <Header as="h4">Millaisen päivän haluat viettää?</Header>
-        </React.Fragment>
+        <PrivatePersonForm
+          getObject={getObject}
+          handleOnChange={handleOnChange}
+          handleOnRadioChange={handleOnRadioChange}
+          values={formData}
+          handleCottageChange={handleCottageChange}
+          activePeriod={activePeriod}
+        />
       )}
       {isCompany && (
         <CompanyForm
@@ -82,7 +91,7 @@ const BasicDetails = ({
         />
       )}
       {formData.locationType && (
-        <React.Fragment>
+        <>
           <SemanticForm.Group>
             <Popup
               flowing
@@ -107,10 +116,10 @@ const BasicDetails = ({
                 />
               }
               content={
-                <React.Fragment>
+                <>
                   {renderDatePicker('hide-mobile')}
                   {renderDatePicker('hide-fullscreen', true)}
-                </React.Fragment>
+                </>
               }
             />
             <SemanticForm.Select
@@ -152,30 +161,19 @@ const BasicDetails = ({
               onChange={handleOnChange}
             />
           </SemanticForm.Group>
-          {isPrivate && (
-            <Message>
-              <Message.Header>Kesäkausi (touko-lokakuu)</Message.Header>
-              <Message.Content style={padded}>
-                5 huonetta /12 hlöä /vrk {getObject('acommodationPrices').summer['1']} €, lisäksi 2 hlön huone mökissä{' '}
-                {getObjectInList('extraPersons', 'cottage').summer['1']} €/vrk
-                <br />
-                Lisäpäivät {getObject('acommodationPrices').summer['2']} €, lisähuone{' '}
-                {getObjectInList('extraPersons', 'cottage').summer['2']} €/vrk
-              </Message.Content>
-              <Message.Header>Talvikausi (marras-huhtikuu)</Message.Header>
-              <Message.Content style={padded}>
-                2 huonetta /6 hlöä /vrk {getObject('acommodationPrices').winter['1']} €, lisäksi mökeissä 4 huonetta{' '}
-                {getObjectInList('extraPersons', 'cottage').winter['1']} €/huone
-                <br />
-                Lisäpäivät {getObject('acommodationPrices').winter['2']} €, lisähuone{' '}
-                {getObjectInList('extraPersons', 'cottage').winter['2']} €/vrk
-              </Message.Content>
-              Joulu ja Uusivuosi kesähinnoittelun mukaan. Hinta sisältää klo 16-12 välisen oleskelun.
-            </Message>
+          {isPrivate && formData.locationType === 'villaParatiisi' && (
+            <PrivateAccommodation
+              formData={formData}
+              getObject={getObject}
+              handleOnChange={handleOnChange}
+              getObjectInList={getObjectInList}
+              handleCottageChange={handleCottageChange}
+              activePeriod={activePeriod}
+            />
           )}
-        </React.Fragment>
+        </>
       )}
-    </React.Fragment>
+    </>
   );
 };
 

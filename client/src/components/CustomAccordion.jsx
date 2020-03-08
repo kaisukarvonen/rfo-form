@@ -39,7 +39,7 @@ const CustomAccordion = ({
             </Form.Field>
           </React.Fragment>
         ))}
-        <p>{extraInfo && extraInfo}</p>
+        <p>{extraInfo}</p>
       </Accordion.Content>
     </Accordion>
   );

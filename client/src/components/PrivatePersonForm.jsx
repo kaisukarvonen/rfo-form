@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { Header, Form, Grid, Accordion, Icon } from 'semantic-ui-react';
+import React from 'react';
+import { Header, Form, Button } from 'semantic-ui-react';
+import Wainola from './Wainola';
 
-const PrivatePersonForm = ({ values, getObject, activePeriod, handleOnChange, handleOnRadioChange, handleCottageChange }) => {
-  const [showExtraPersons, setShowExtraPersons] = useState(false);
-
+const PrivatePersonForm = ({ values, getObject, handleOnChange, handleOnRadioChange }) => {
   return (
     <div>
       <Header as="h4">{getObject('visitTypeTitle').fi}</Header>
@@ -33,44 +32,24 @@ const PrivatePersonForm = ({ values, getObject, activePeriod, handleOnChange, ha
         onChange={handleOnChange}
       />
 
-      <Accordion>
-        <Accordion.Title active={showExtraPersons} onClick={() => setShowExtraPersons(!showExtraPersons)}>
-          <Header as="h4">
-            <Icon name="dropdown" />
-            Lisähenkilöt
-          </Header>
-        </Accordion.Title>
-        <Accordion.Content active={showExtraPersons}>
-          <Grid>
-            {getObject('extraPersons').options.map(i => (
-              <Grid.Row key={i.key}>
-                <Grid.Column width={14} style={{ maxWidth: '390px' }}>
-                  {i.key === 'cottage' ? (
-                    <React.Fragment>
-                      <p>{i.fi}</p>
-                      <Form.Group>
-                        {i[activePeriod].choices.map((choice, index) => (
-                          <Form.Checkbox
-                            label={`${choice} hlön huone`}
-                            id={index + 1}
-                            checked={values.cottages[index]}
-                            onChange={handleCottageChange}
-                          />
-                        ))}
-                      </Form.Group>
-                    </React.Fragment>
-                  ) : (
-                    <Form.Checkbox label={i.fi} id={i.key} checked={values[i.key]} onChange={handleOnChange} />
-                  )}
-                </Grid.Column>
-                <Grid.Column width={2}>
-                  <p>{i.key === 'cottage' ? `${i[activePeriod]['1']} €` : `${i.price} €`}</p>
-                </Grid.Column>
-              </Grid.Row>
-            ))}
-          </Grid>
-        </Accordion.Content>
-      </Accordion>
+      <Header as="h3">Millaisen päivän haluat viettää?</Header>
+      <div className="flex-column" style={{ marginBottom: 15 }}>
+        <Button
+          active={values.locationType === 'villaParatiisi'}
+          compact
+          size="small"
+          basic
+          onClick={() => handleOnChange(null, { id: 'locationType', value: 'villaParatiisi' })}
+        >
+          <b>{getObject('villaParatiisi').fi}</b> - rantahuvila
+        </Button>
+        <Wainola
+          getObject={getObject}
+          handleOnChange={handleOnChange}
+          handleOnRadioChange={handleOnRadioChange}
+          values={values}
+        />
+      </div>
     </div>
   );
 };
