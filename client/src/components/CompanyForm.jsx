@@ -72,7 +72,7 @@ const CompanyForm = ({ getObject, values, showInfo, handleOnRadioChange, handleO
           >
             <b>{getObject('haltia').fi}</b> (max 200 hlöä)
           </Button>
-          {values.locationType === 'haltia' && visitOptions('haltia', 'haltiaType')}
+          {values.locationType === 'haltia' && visitOptions('haltia', 'haltia')}
           <Button
             active={values.locationType === 'ilmanTiloja'}
             compact

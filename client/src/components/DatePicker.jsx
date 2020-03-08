@@ -23,6 +23,7 @@ const DatePicker = ({
     start: from,
     end: to
   };
+  const pastDays = { before: new Date() };
 
   return (
     <div className={className || ''} style={{ opacity: loading ? 0 : 1 }}>
@@ -51,7 +52,7 @@ const DatePicker = ({
         onDayClick={handleDayClick}
         modifiers={!alwaysAvailable ? { ...modifiers, availableFrom16, availableUntil12 } : modifiers}
         selectedDays={[from, { from, to }]}
-        disabledDays={alwaysAvailable ? [] : [{ before: new Date() }, ...disabledDays]}
+        disabledDays={alwaysAvailable ? [pastDays] : [pastDays, ...disabledDays]}
       />
       {!alwaysAvailable && (
         <div style={{ margin: '0 0 0 20px' }}>

@@ -76,14 +76,17 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
   const toggleDatePicker = () => {
     setPopup(!popupOpen);
   };
+  const cottageOptions = period => {
+    return new Array(getObjectInList('extraPersons', 'cottage')[period].choices.length).fill(false);
+  };
+
+  const notVilla = formData.locationType !== 'villaParatiisi';
 
   const handleDayClick = (day, modifiers) => {
     let { to, from } = formData;
-    const notVilla = formData.locationType !== 'villaParatiisi';
     if (!from || notVilla) {
       from = day;
     } else if (!to) {
-      // to = day;
       to = day;
     }
     if (to && from) {
@@ -236,19 +239,15 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
       basicInfo.Hinta = `${calculatePrice()} €`;
     }
     const extraPersons = { title: 'Lisähenkilöt' };
-    getObject('extraPersons').options.forEach(ac => {
-      if (ac.key === 'cottage') {
-        let cottages = '';
-        data.cottages.forEach((val, i) => {
-          if (val) {
-            cottages += `${ac.choices[i]} hlön huone, `;
-          }
-        });
-        extraPersons['Huoneet mökissä'] = !!cottages && cottages;
-      } else {
-        extraPersons[ac.fi] = !!data[ac.key];
+    const cottages = [];
+    const cottage = getObjectInList('extraPersons', 'cottage')[activePeriod];
+    data.cottages.forEach((val, i) => {
+      if (val) {
+        cottages.push(`${cottage.choices[i]} hlön huone`);
       }
     });
+    const strCottages = cottages.join(', ');
+    extraPersons['Huoneet mökissä'] = !!strCottages && strCottages;
 
     const priceField = formData.type === 'company' ? 'price' : 'alvPrice';
 
@@ -287,7 +286,13 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
     }
 
     visitDetails['Vierailun tyyppi'] = visitString || data.visitTypeString;
-    visitDetails.Tilat = data.locationType && getObject(data.locationType).fi;
+    const { locationType, wainola, haltia } = data;
+    visitDetails.Tilat = locationType && getObject(locationType).fi;
+    if (locationType === 'wainola' && wainola) {
+      visitDetails.Tilat += ` - ${wainola === 'weekDays' ? 'su-to' : 'pe-la'}`;
+    } else if (locationType === 'haltia' && haltia) {
+      visitDetails.Tilat += ` - ${getObjectInList('haltia', haltia).fi}`;
+    }
     visitDetails['Yrityksen nimi'] = data.companyName;
     return {
       basicInfo,
@@ -312,10 +317,6 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
 
   const setType = type => {
     setFormData({ ...formData, type });
-  };
-
-  const cottageOptions = period => {
-    return new Array(getObjectInList('extraPersons', 'cottage')[period].choices.length).fill(false);
   };
 
   return (
@@ -344,6 +345,7 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
           {formData.type && (
             <>
               <BasicDetails
+                notVilla={notVilla}
                 formData={formData}
                 popupOpen={popupOpen}
                 getObject={getObject}

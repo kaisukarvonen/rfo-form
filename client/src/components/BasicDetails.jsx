@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Form as SemanticForm, Popup, Message, Header, Accordion, Form, Grid, Icon } from 'semantic-ui-react';
+import React from 'react';
+import { Form as SemanticForm, Popup, Header, Icon } from 'semantic-ui-react';
 import 'moment/locale/fi';
 import DatePicker from './DatePicker';
 import CompanyForm from './CompanyForm';
@@ -21,23 +21,21 @@ const BasicDetails = ({
   showInfo,
   handleOnRadioChange,
   handleCottageChange,
-  activePeriod
+  activePeriod,
+  notVilla
 }) => {
   const timeOptions = () => {
     const options = new Array(17).fill(null).map((val, i) => {
       const time = 8 + i;
       return {
-        key: time,
-        value: time,
+        key: `${time}`,
+        value: `${time}`,
         text: `${time}:00`
       };
     });
     return options;
   };
 
-  const padded = {
-    marginBottom: 8
-  };
   const { from, to } = formData;
 
   const renderDatePicker = (className, compact) => (
@@ -128,7 +126,7 @@ const BasicDetails = ({
               compact
               required
               style={{
-                pointerEvents: isCompany ? 'auto' : 'none'
+                pointerEvents: isCompany || notVilla ? 'auto' : 'none'
               }}
               placeholder="hh:mm"
               options={timeOptions()}
@@ -142,7 +140,7 @@ const BasicDetails = ({
               compact
               required
               style={{
-                pointerEvents: isCompany ? 'auto' : 'none'
+                pointerEvents: isCompany || notVilla ? 'auto' : 'none'
               }}
               placeholder="hh:mm"
               options={timeOptions()}
