@@ -12,7 +12,7 @@ export const getCalendarEvents = () => {
   // const minDate = moment().add(1, 'months').toISOString();
   const maxDate = moment()
     .startOf('day')
-    .add(5, 'months')
+    .add(14, 'months')
     .toISOString();
   const promise = axios
     .get(`https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events`, {
@@ -32,7 +32,6 @@ export const getCalendarEvents = () => {
 export const formatDates = events => {
   // if end is before 12 --> availableFrom16
   // if start is after 16 --> availableUntil12
-
   const disabledDays = [];
   const from16 = [];
   const until12 = [];
