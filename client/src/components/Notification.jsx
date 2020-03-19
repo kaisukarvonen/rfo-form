@@ -15,9 +15,9 @@ const Notification = ({ hideNotification, notification }) => {
             {notification.success ? (
               successMsg
             ) : (
-              <React.Fragment>
+              <>
                 <Icon name="exclamation triangle" /> {errorMsg}
-              </React.Fragment>
+              </>
             )}
           </p>
         </Modal.Content>

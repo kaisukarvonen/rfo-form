@@ -6,7 +6,7 @@ mongo-data/
 .client
 npm-debug.log
 node_modules
-pyenv/
+rfo-env/
 images/
 fabfile.py
 Dockerfile.*

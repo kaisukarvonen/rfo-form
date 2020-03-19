@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Container, Header, Form as SemanticForm, Message, Grid, Button } from 'semantic-ui-react';
 import 'moment/locale/fi';
 import moment from 'moment';
-import CompanyForm from './CompanyForm';
 import Extras from './Extras';
-import PrivatePersonForm from './PrivatePersonForm';
 import createHTML from './Template';
 import { validEmail, showInfo } from '../utils';
 import BasicDetails from './BasicDetails';
 
 const initialForm = {
-  type: 'company',
+  // type: undefined,
+  type: 'private',
   from: undefined,
   to: undefined,
   personAmount: 1,
@@ -77,10 +76,15 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
   const toggleDatePicker = () => {
     setPopup(!popupOpen);
   };
+  const cottageOptions = period => {
+    return new Array(getObjectInList('extraPersons', 'cottage')[period].choices.length).fill(false);
+  };
+
+  const notVilla = formData.locationType !== 'villaParatiisi';
 
   const handleDayClick = (day, modifiers) => {
     let { to, from } = formData;
-    if (!from) {
+    if (!from || notVilla) {
       from = day;
     } else if (!to) {
       to = day;
@@ -120,6 +124,9 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
         from16Info: modifiers.availableFrom16,
         cottages
       });
+      if (notVilla) {
+        toggleDatePicker();
+      }
     }
   };
 
@@ -204,7 +211,7 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
         ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}`
         : moment(from).format('DD.MM.YYYY');
     } else if (from && !to) {
-      if (formData.type !== 'company') {
+      if (formData.type !== 'company' && formData.locationType === 'villaParatiisi') {
         return `${moment(from).format('DD.MM.YYYY')} - ${moment(from)
           .add(1, 'days')
           .format('DD.MM.YYYY')}`;
@@ -232,19 +239,15 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
       basicInfo.Hinta = `${calculatePrice()} €`;
     }
     const extraPersons = { title: 'Lisähenkilöt' };
-    getObject('extraPersons').options.forEach(ac => {
-      if (ac.key === 'cottage') {
-        let cottages = '';
-        data.cottages.forEach((val, i) => {
-          if (val) {
-            cottages += `${ac.choices[i]} hlön huone, `;
-          }
-        });
-        extraPersons['Huoneet mökissä'] = !!cottages && cottages;
-      } else {
-        extraPersons[ac.fi] = !!data[ac.key];
+    const cottages = [];
+    const cottage = getObjectInList('extraPersons', 'cottage')[activePeriod];
+    data.cottages.forEach((val, i) => {
+      if (val) {
+        cottages.push(`${cottage.choices[i]} hlön huone`);
       }
     });
+    const strCottages = cottages.join(', ');
+    extraPersons['Huoneet mökissä'] = !!strCottages && strCottages;
 
     const priceField = formData.type === 'company' ? 'price' : 'alvPrice';
 
@@ -283,7 +286,13 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
     }
 
     visitDetails['Vierailun tyyppi'] = visitString || data.visitTypeString;
-    visitDetails.Tilat = data.locationType && getObject(data.locationType).fi;
+    const { locationType, wainola, haltia } = data;
+    visitDetails.Tilat = locationType && getObject(locationType).fi;
+    if (locationType === 'wainola' && wainola) {
+      visitDetails.Tilat += ` - ${wainola === 'weekDays' ? 'su-to' : 'pe-la'}`;
+    } else if (locationType === 'haltia' && haltia) {
+      visitDetails.Tilat += ` - ${getObjectInList('haltia', haltia).fi}`;
+    }
     visitDetails['Yrityksen nimi'] = data.companyName;
     return {
       basicInfo,
@@ -296,7 +305,6 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
   };
 
   const createMail = () => {
-    console.log(createDataFields());
     if (isValid()) {
       const strDates = dateToStr(formData.from, formData.to);
       const title = `Tarjouspyyntö ${strDates}`;
@@ -309,10 +317,6 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
 
   const setType = type => {
     setFormData({ ...formData, type });
-  };
-
-  const cottageOptions = period => {
-    return new Array(getObjectInList('extraPersons', 'cottage')[period].choices.length).fill(false);
   };
 
   return (
@@ -339,8 +343,9 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
           </Grid>
 
           {formData.type && (
-            <React.Fragment>
+            <>
               <BasicDetails
+                notVilla={notVilla}
                 formData={formData}
                 popupOpen={popupOpen}
                 getObject={getObject}
@@ -352,66 +357,52 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
                 availableUntil12={availableUntil12}
                 availableFrom16={availableFrom16}
                 dateToStr={dateToStr}
+                showInfo={showInfo}
+                handleOnRadioChange={handleOnRadioChange}
+                handleCottageChange={handleCottageChange}
+                activePeriod={activePeriod}
               />
               {Object.values(errors).some(Boolean) && (
                 <Message negative>
                   {Object.keys(errors).map(errorKey => errors[errorKey] && <Message.Content>{errors[errorKey]}</Message.Content>)}
                 </Message>
               )}
-              {formData.type === 'company' ? (
-                <CompanyForm
-                  getObject={getObject}
-                  handleOnChange={handleOnChange}
-                  handleOnRadioChange={handleOnRadioChange}
-                  values={formData}
-                  showInfo={showInfo}
-                />
-              ) : (
-                formData.cottages &&
-                activePeriod && (
-                  <PrivatePersonForm
-                    getObject={getObject}
-                    handleOnChange={handleOnChange}
-                    handleOnRadioChange={handleOnRadioChange}
-                    values={formData}
-                    handleCottageChange={handleCottageChange}
-                    activePeriod={activePeriod}
+              {formData.from && (
+                <>
+                  <Extras getObject={getObject} showInfo={showInfo} values={formData} handleOnChange={handleOnChange} />
+                  <SemanticForm.TextArea
+                    rows={3}
+                    autoHeight
+                    label="Lisätietoja tarjouspyyntöön"
+                    value={formData.moreInformation}
+                    id="moreInformation"
+                    onChange={handleOnChange}
                   />
-                )
+                  {showPrice && (
+                    <Header as="h4" dividing>
+                      Alustava hinta
+                    </Header>
+                  )}
+                  <p>
+                    {showPrice && (
+                      <>
+                        {`Alustava hinta ${
+                          formData.type === 'company' ? '(alv 0%)' : ''
+                        } sisältäen hinnoitellut palvelut: ${calculatePrice()} €`}
+                        <br />
+                      </>
+                    )}
+                    Tarjoilujen ja ohjelmien hinnat määräytyvät saatavuuden mukaan. Pidätämme oikeuden muutoksiin.
+                  </p>
+
+                  <Message>
+                    <Message.Content>{getObject('paymentInfo')[formData.type].fi}</Message.Content>
+                  </Message>
+
+                  <SemanticForm.Button primary content="Lähetä" onClick={createMail} />
+                </>
               )}
-              <Extras getObject={getObject} showInfo={showInfo} values={formData} handleOnChange={handleOnChange} />
-              <SemanticForm.TextArea
-                rows={3}
-                autoHeight
-                label="Lisätietoja tarjouspyyntöön"
-                value={formData.moreInformation}
-                id="moreInformation"
-                onChange={handleOnChange}
-              />
-
-              {showPrice && (
-                <Header as="h4" dividing>
-                  Alustava hinta
-                </Header>
-              )}
-              <p>
-                {showPrice && (
-                  <React.Fragment>
-                    {`Alustava hinta ${
-                      formData.type === 'company' ? '(alv 0%)' : ''
-                    } sisältäen hinnoitellut palvelut: ${calculatePrice()} €`}
-                    <br />
-                  </React.Fragment>
-                )}
-                Tarjoilujen ja ohjelmien hinnat määräytyvät saatavuuden mukaan. Pidätämme oikeuden muutoksiin.
-              </p>
-
-              <Message>
-                <Message.Content>{getObject('paymentInfo')[formData.type].fi}</Message.Content>
-              </Message>
-
-              <SemanticForm.Button primary content="Lähetä" onClick={createMail} />
-            </React.Fragment>
+            </>
           )}
         </SemanticForm>
       </Container>
