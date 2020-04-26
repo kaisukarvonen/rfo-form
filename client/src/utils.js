@@ -6,14 +6,9 @@ import { GOOGLE_API_KEY, CALENDAR_ID } from './config';
 export const lan = new URLSearchParams(window.location.search).get('language') || 'fi';
 
 export const getCalendarEvents = () => {
-  const minDate = moment()
-    .startOf('day')
-    .toISOString();
+  const minDate = moment().startOf('day').toISOString();
   // const minDate = moment().add(1, 'months').toISOString();
-  const maxDate = moment()
-    .startOf('day')
-    .add(14, 'months')
-    .toISOString();
+  const maxDate = moment().startOf('day').add(14, 'months').toISOString();
   const promise = axios
     .get(`https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events`, {
       params: {
@@ -21,21 +16,21 @@ export const getCalendarEvents = () => {
         timeMin: minDate,
         timeMax: maxDate,
         orderBy: 'startTime',
-        singleEvents: true
-      }
+        singleEvents: true,
+      },
     })
-    .then(response => response)
-    .catch(error => error);
+    .then((response) => response)
+    .catch((error) => error);
   return promise;
 };
 
-export const formatDates = events => {
+export const formatDates = (events) => {
   // if end is before 12 --> availableFrom16
   // if start is after 16 --> availableUntil12
   const disabledDays = [];
   const from16 = [];
   const until12 = [];
-  events.forEach(event => {
+  events.forEach((event) => {
     // each event has end and start object with either date or dateTime
     if (event.start.date) {
       // event has only date and no time defined --> it lasts whole day
@@ -62,7 +57,7 @@ export const formatDates = events => {
           disabledDays.push(fStart);
         } else if (from16.includes(fStart)) {
           disabledDays.push(fStart);
-          const index = from16.findIndex(d => d === fStart);
+          const index = from16.findIndex((d) => d === fStart);
           from16.splice(index, 1);
         } else {
           until12.push(fStart);
@@ -73,7 +68,7 @@ export const formatDates = events => {
         disabledDays.push(fEnd);
       } else if (until12.includes(fEnd)) {
         disabledDays.push(fEnd);
-        const index = until12.findIndex(d => d === fEnd);
+        const index = until12.findIndex((d) => d === fEnd);
         until12.splice(index, 1);
       } else {
         from16.push(fEnd);
@@ -83,12 +78,12 @@ export const formatDates = events => {
   return { disabledDays, from16, until12 };
 };
 
-export const validEmail = email =>
+export const validEmail = (email) =>
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(
     email
   ); // credit: MDN
 
-export const showInfo = object => {
+export const showInfo = (object) => {
   let info = object.infoFi;
   if (info && info.includes('*s_link*')) {
     const link = '*s_link*';
@@ -106,3 +101,6 @@ export const showInfo = object => {
   }
   return info;
 };
+
+export const reserveRightsToChanges =
+  'Tarjoilujen ja ohjelmien hinnat määräytyvät saatavuuden mukaan. Pidätämme oikeuden muutoksiin.';

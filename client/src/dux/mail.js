@@ -10,7 +10,7 @@ export const sendedMail = () => ({ type: SENDED_MAIL });
 
 const defaultState = { sendingEmail: false };
 
-export default function(state = defaultState, action) {
+export default function (state = defaultState, action) {
   switch (action.type) {
     case SEND_MAIL:
       return { ...state, sendingEmail: true };
@@ -35,4 +35,6 @@ function* sendMailWorker(action) {
   }
 }
 
-export const mailSagas = [takeLatest(SEND_MAIL, sendMailWorker)];
+export function* watchLastSendMail() {
+  yield takeLatest(SEND_MAIL, sendMailWorker);
+}

@@ -1,35 +1,58 @@
 import React from 'react';
-import { Email, Item, Span, renderEmail } from 'react-html-email';
+import { reserveRightsToChanges } from '../utils';
 
-function createHTML(data, title, description, moreInformation) {
-  return renderEmail(
-    <Email title={title} align="left">
-      <Item>{description}</Item>
-      <br />
-      {Object.keys(data).map((innerObject, i) => (
-        <div key={i}>
-          <Item style={{ paddingTop: 15 }}>
-            <Span fontSize={17}>{data[innerObject].title}</Span>
-          </Item>
-          {Object.keys(data[innerObject]).map(
-            (key, ind) =>
-              key !== 'title' &&
-              data[innerObject][key] && (
-                <Item key={ind}>
-                  <Span fontSize={13}>
-                    <b>{key}</b>
+const renderRow = (value, title) => {
+  const isHeaderRow = title === 'title';
+  const spanStyle = { fontSize: '15px' };
+  const isArray = Array.isArray(value);
+  return value && (isArray ? value.length : true) ? (
+    <tr>
+      <td style={{ paddingTop: '9px' }}>
+        {title && (
+          <div>
+            <span style={{ fontSize: isHeaderRow ? '18px' : '16px' }}>
+              <b>{isHeaderRow ? value : title}</b>
+            </span>
+            <br />
+          </div>
+        )}
+        {!isHeaderRow ? (
+          isArray ? (
+            value.map(
+              (v) =>
+                v && (
+                  <div>
+                    <span style={spanStyle}>{v}</span>
                     <br />
-                  </Span>
-                  <Span fontSize={13}>{data[innerObject][key]}</Span>
-                  <hr />
-                </Item>
-              )
-          )}
-        </div>
-      ))}
-      {moreInformation && <Item>Lisätietoa tarjouspyyntöön: {moreInformation}</Item>}
-    </Email>
+                  </div>
+                )
+            )
+          ) : (
+            <span style={spanStyle}>{value}</span>
+          )
+        ) : null}
+      </td>
+    </tr>
+  ) : null;
+};
+
+const createHTML = (data, description, moreInformation) => {
+  return (
+    <table width="100%" height="100%" cellPadding="0" cellSpacing="0" border="0" align="left" valign="top">
+      <tbody>
+        {renderRow(description)}
+        <br />
+        {Object.entries(data.basicInfo).map((obj) => renderRow(obj[1], obj[0]))}
+        {Object.entries(data.food).map((obj) => renderRow(obj[1], obj[0]))}
+        {Object.entries(data.activities).map((obj) => renderRow(obj[1], obj[0]))}
+        {Object.entries(data.rentalEquipment).map((obj) => renderRow(obj[1], obj[0]))}
+        {Object.entries(data.extraServices).map((obj) => renderRow(obj[1], obj[0]))}
+        {Object.entries(data.visitDetails).map((obj) => renderRow(obj[1], obj[0]))}
+        {moreInformation && renderRow(moreInformation, 'Lisätietoa')}
+        {renderRow(<i style={{ fontSize: '12px' }}>{reserveRightsToChanges}</i>)}
+      </tbody>
+    </table>
   );
-}
+};
 
 export default createHTML;

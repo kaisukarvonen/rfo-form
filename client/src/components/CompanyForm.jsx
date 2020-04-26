@@ -7,7 +7,7 @@ const CompanyForm = ({ getObject, values, showInfo, handleOnRadioChange, handleO
   const visitOptions = (key, type) => {
     return (
       <Grid className="extra-persons">
-        {getObject(key).options.map(m => (
+        {getObject(key).options.map((m) => (
           <Grid.Row key={m.key}>
             <Grid.Column width={10}>
               <Form.Field inline>
@@ -32,6 +32,8 @@ const CompanyForm = ({ getObject, values, showInfo, handleOnRadioChange, handleO
       </Grid>
     );
   };
+
+  const ilmanTiloja = getObject('ilmanTiloja');
 
   return (
     <>
@@ -83,7 +85,24 @@ const CompanyForm = ({ getObject, values, showInfo, handleOnRadioChange, handleO
             {getObject('ilmanTiloja').fi}
           </Button>
           {values.locationType === 'ilmanTiloja' && (
-            <span style={{ marginLeft: 10 }}>{getObject('ilmanTiloja').price} € + alv</span>
+            <Grid className="extra-persons">
+              <Grid.Row key={ilmanTiloja.key}>
+                <Grid.Column width={10}>
+                  <Form.Field inline>
+                    <Checkbox
+                      radio
+                      label={ilmanTiloja.fi}
+                      value={ilmanTiloja.key}
+                      checked={values.ilmanTiloja === ilmanTiloja.key}
+                      onChange={(e, data) => handleOnRadioChange(e, data, ilmanTiloja.key)}
+                    />
+                  </Form.Field>
+                </Grid.Column>
+                <Grid.Column width={5}>
+                  <p>{ilmanTiloja.price} € + alv</p>
+                </Grid.Column>
+              </Grid.Row>
+            </Grid>
           )}
         </div>
       </>

@@ -12,3 +12,5 @@ fabfile.py
 Dockerfile.*
 docker-compose.prod.yml*
 client/src/config.js
+client/.cache
+client/dist

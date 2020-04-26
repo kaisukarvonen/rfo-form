@@ -80,6 +80,7 @@ body {
 .ui.grid.extra-persons > .row {
   align-items: center;
   margin-bottom: 3px;
+  min-width: 240px;
 }
 
 .ui.grid.extra-persons > .row > .column .field {
@@ -168,4 +169,19 @@ p {
 
 .ui.table.activity-list td {
   height: 38px !important;
+}
+
+.ui.grid.extra-persons.private-acommodation > .row > .column {
+  max-width: 390px;
+}
+.private-acommodation .pricing-header {
+  color: #666;
+}
+.private-acommodation .ui .label {
+  padding: 0.5em !important;
+  height: 30px;
+}
+
+.private-acommodation .cottage-selector {
+  width: 30%;
 }

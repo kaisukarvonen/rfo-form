@@ -4,9 +4,10 @@ import fetch from './api/fields';
 const FETCH_FIELDS = 'FETCH_FIELDS';
 const FETCHED_FIELDS = 'FETCHED_FIELDS';
 
-export const fetchFields = () => ({ type: FETCH_FIELDS });
-export const fetchedFields = fieldValues => ({ type: FETCHED_FIELDS, fields: fieldValues });
-
+export const fetchFields = () => {
+  return { type: FETCH_FIELDS };
+};
+export const fetchedFields = (fieldValues) => ({ type: FETCHED_FIELDS, fields: fieldValues });
 
 const defaultState = { fields: [] };
 
@@ -19,17 +20,15 @@ export default function (state = defaultState, action) {
   }
 }
 
-
 function* fetchFieldsWorker() {
   try {
     const response = yield call(fetch);
     if (response.status === 200) {
       yield put(fetchedFields(response.data));
     }
-  } catch (e) {
-  }
+  } catch (e) {}
 }
 
-export const fieldSagas = [
-  takeLatest(FETCH_FIELDS, fetchFieldsWorker),
-];
+export function* watchLastFetchFields() {
+  yield takeLatest(FETCH_FIELDS, fetchFieldsWorker);
+}
