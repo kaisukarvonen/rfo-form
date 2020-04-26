@@ -1,9 +1,22 @@
 {
-  "extends": ["react-app", "airbnb", "prettier", "prettier/react"],
-  // "plugins": ["prettier"],
-  "globals": {
-    "document": true,
-    "window": true
+  "extends": [
+    "eslint:recommended",
+    "plugin:import/errors", // if that file exports something the other file can import it and if it doesn't export it cant be imported somewhere else
+    "plugin:react/recommended", // this fixes a lot of React problems, but you can question these rules
+    "plugin:jsx-a11y/recommended",
+    "prettier",
+    "prettier/react"
+  ],
+  "plugins": ["react", "import", "jsx-a11y"],
+  "parseOptions": {
+    "ecmaVersion": 2018, // it will allow us to use async, await, etc.
+    "sourceType": "module", // this means we will import and export (ES modules)
+    "ecmaFeatures": { "jsx": true } // ESLint will understand jsxformat
+  },
+  "env": {
+    "es6": true, // to use ES6 features
+    "browser": true, // to use document, setTimeout, window and other browser things
+    "node": true // to use http, require and other node things
   },
   "rules": {
     "jsx-a11y/href-no-hash": "off",

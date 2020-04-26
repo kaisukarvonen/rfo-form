@@ -17,14 +17,6 @@ services:
     links:
       - mongodb
 
-  rfo-form-client:
-    container_name: rfo-form-client
-    build: ./client/
-    volumes:
-      - ./client:/usr/src/
-      - /usr/src/node_modules
-    ports:
-      - '7676:3000'
   mongodb:
     container_name: rfo-form-mongodb
     image: mongo:latest

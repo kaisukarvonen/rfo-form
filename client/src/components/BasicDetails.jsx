@@ -22,7 +22,9 @@ const BasicDetails = ({
   handleOnRadioChange,
   handleCottageChange,
   activePeriod,
-  notVilla
+  notVilla,
+  numOfNights,
+  privatePersonAcommodationPrice,
 }) => {
   const timeOptions = () => {
     const options = new Array(17).fill(null).map((val, i) => {
@@ -30,7 +32,7 @@ const BasicDetails = ({
       return {
         key: `${time}`,
         value: `${time}`,
-        text: `${time}:00`
+        text: `${time}:00`,
       };
     });
     return options;
@@ -120,13 +122,14 @@ const BasicDetails = ({
                 </>
               }
             />
+
             <SemanticForm.Select
               label={getObject('arrivalTime').fi}
               width={4}
               compact
               required
               style={{
-                pointerEvents: isCompany || notVilla ? 'auto' : 'none'
+                pointerEvents: isCompany || notVilla ? 'auto' : 'none',
               }}
               placeholder="hh:mm"
               options={timeOptions()}
@@ -140,7 +143,7 @@ const BasicDetails = ({
               compact
               required
               style={{
-                pointerEvents: isCompany || notVilla ? 'auto' : 'none'
+                pointerEvents: isCompany || notVilla ? 'auto' : 'none',
               }}
               placeholder="hh:mm"
               options={timeOptions()}
@@ -161,6 +164,8 @@ const BasicDetails = ({
           </SemanticForm.Group>
           {isPrivate && formData.locationType === 'villaParatiisi' && (
             <PrivateAccommodation
+              numOfNights={numOfNights}
+              privatePersonAcommodationPrice={privatePersonAcommodationPrice}
               formData={formData}
               getObject={getObject}
               handleOnChange={handleOnChange}

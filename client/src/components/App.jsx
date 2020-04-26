@@ -20,7 +20,7 @@ const App = ({ hideNotification, notification, fetchFields, fields, sendingEmail
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     fetchFields();
-    getCalendarEvents().then(response => {
+    getCalendarEvents().then((response) => {
       const { disabledDays, from16, until12 } = formatDates(response.data.items);
       setDisabledDays(disabledDays);
       setAvailableFrom16(from16);
@@ -66,17 +66,17 @@ const App = ({ hideNotification, notification, fetchFields, fields, sendingEmail
 };
 
 export default connect(
-  state => ({
+  (state) => ({
     fields: state.fields.fields,
     notification: state.notification.notification,
-    sendingEmail: state.mail.sendingEmail
+    sendingEmail: state.mail.sendingEmail,
   }),
-  dispatch =>
+  (dispatch) =>
     bindActionCreators(
       {
         ...fieldActions,
         ...mailActions,
-        ...notificationActions
+        ...notificationActions,
       },
       dispatch
     )
