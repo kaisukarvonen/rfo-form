@@ -173,7 +173,7 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
     }
     const priceField = formData.type === 'company' ? 'price' : 'alvPrice';
     let price = 0;
-    const { linen, towels, hottub, meetingType, to, from, type, cottages, cleaning, petFee, laavu, recreationType } = formData;
+    const { linen, towels, hottub, meetingType, to, from, type, cottages, cleaning, petFee } = formData;
 
     price = meetingType ? getObjectInList('meetingOptions', formData.meetingType).price : 0;
     price +=

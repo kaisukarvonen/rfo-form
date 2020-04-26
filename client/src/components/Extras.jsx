@@ -7,7 +7,7 @@ const Extras = ({ values, getObject, showInfo, handleOnChange }) => {
 
   const handleAccordionClick = (e, titleProps) => {
     const { index } = titleProps;
-    const indexInArray = accordions.findIndex(i => i === index);
+    const indexInArray = accordions.findIndex((i) => i === index);
     const newArray = [...accordions];
     if (indexInArray !== -1) {
       newArray.splice(indexInArray, 1);
@@ -23,7 +23,7 @@ const Extras = ({ values, getObject, showInfo, handleOnChange }) => {
     return <p style={{ paddingTop: '2px' }}>{`${object[priceField]} € ${alvText} ${extra || ''}`}</p>;
   };
 
-  const displayCleaningPrice = object => {
+  const displayCleaningPrice = (object) => {
     return `kesällä ${object.summer} €, talvella huvila ${object.winter.villa} € + ${object.winter.cottage} € / huone mökissä`;
   };
 
@@ -111,7 +111,7 @@ const Extras = ({ values, getObject, showInfo, handleOnChange }) => {
             </Accordion.Title>
             <Accordion.Content active={accordions.includes(4)}>
               <Grid style={{ marginBottom: '1px' }}>
-                {getObject('rentalEquipment').options.map(i => (
+                {getObject('rentalEquipment').options.map((i) => (
                   <Grid.Row key={i.key}>
                     <Grid.Column width={9} style={{ maxWidth: '250px' }}>
                       <Form.Checkbox label={i.fi} id={i.key} checked={values[i.key]} onChange={handleOnChange} />
@@ -145,9 +145,6 @@ const Extras = ({ values, getObject, showInfo, handleOnChange }) => {
                       onChange={handleOnChange}
                     />
                   )}
-                  {values.type === 'company' && (
-                    <Form.Checkbox label={getObject('laavu').fi} id="laavu" checked={values.laavu} onChange={handleOnChange} />
-                  )}
                 </Grid.Column>
                 <Grid.Column width={7}>
                   {displayExtraServicePrice(getObject('linen'))}
@@ -155,7 +152,6 @@ const Extras = ({ values, getObject, showInfo, handleOnChange }) => {
                   {displayExtraServicePrice(getObject('hottub'))}
                   {displayExtraServicePrice(getObject('petFee'))}
                   {values.type === 'private' && displayCleaningPrice(getObject('cleaning'))}
-                  {values.type === 'company' && displayExtraServicePrice(getObject('laavu'), ' / hlö')}
                 </Grid.Column>
               </Grid>
             </Accordion.Content>
