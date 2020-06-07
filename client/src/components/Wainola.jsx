@@ -10,30 +10,35 @@ const Wainola = ({ values, handleOnChange, getObject, isCompany, handleOnRadioCh
       basic
       onClick={() => handleOnChange(null, { id: 'locationType', value: 'wainola' })}
     >
-      <b>{getObject('wainola').fi}</b> - hirsitupa päiväkäyttöön (max 50 hlöä istuen)
+      <b>{getObject('wainola').fi}</b> - hirsitupa päiväkäyttöön (max 45 hlöä istuen)
     </Button>
     {values.locationType === 'wainola' && (
       <Grid className="extra-persons">
         {[
-          { name: 'sunnuntai-torstai', key: 'weekDays' },
-          { name: 'perjantai-lauantai', key: 'weekend' }
-        ].map(day => (
-          <Grid.Row key={day.key}>
-            <Grid.Column width={7}>
-              <Form.Field inline>
-                <Checkbox
-                  radio
-                  label={day.name}
-                  value={day.key}
-                  checked={values.wainola === day.key}
-                  onChange={(e, data) => handleOnRadioChange(e, data, 'wainola')}
-                />
-              </Form.Field>
-            </Grid.Column>
-            <Grid.Column width={5}>
-              {getObject('wainola')[day.key]} € {isCompany && '+ alv'}
-            </Grid.Column>
-          </Grid.Row>
+          { name: 'Sunnuntai-perjantai', key: 'weekDays' },
+          { name: 'Lauantai', key: 'weekend' },
+        ].map((day) => (
+          <React.Fragment key={day.key}>
+            <b> {day.name}</b>
+            {getObject('wainola')[day.key].map((option) => (
+              <Grid.Row key={option.key}>
+                <Grid.Column width={6}>
+                  <Form.Field inline>
+                    <Checkbox
+                      radio
+                      label={option.text}
+                      value={option.key}
+                      checked={values.wainola === option.key}
+                      onChange={(e, data) => handleOnRadioChange(e, data, 'wainola')}
+                    />
+                  </Form.Field>
+                </Grid.Column>
+                <Grid.Column width={3}>{option.duration} h</Grid.Column>
+
+                <Grid.Column width={4}>{isCompany ? `${option.price} € + alv` : `${option.alvPrice} €`}</Grid.Column>
+              </Grid.Row>
+            ))}
+          </React.Fragment>
         ))}
       </Grid>
     )}

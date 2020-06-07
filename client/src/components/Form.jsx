@@ -8,8 +8,13 @@ import createHTML from './Template';
 import { validEmail, showInfo, reserveRightsToChanges } from '../utils';
 import BasicDetails from './BasicDetails';
 
+export const WainolaKeys = [
+  { name: 'Sunnuntai-perjantai', key: 'weekDays' },
+  { name: 'Lauantai', key: 'weekend' },
+];
+
 const initialForm = {
-  type: 'private',
+  type: undefined,
   from: undefined,
   to: undefined,
   personAmount: 1,
@@ -269,8 +274,8 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
     if (showPrice) {
       basicInfo.Hinta = `${calculatePrice()} €`;
     }
-
-    const priceField = formData.type === 'company' ? 'price' : 'alvPrice';
+    const isCompany = formData.type === 'company';
+    const priceField = isCompany ? 'price' : 'alvPrice';
 
     const food = {
       Tarjoilut: getObject('foodOptions')
@@ -309,7 +314,7 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
     const { locationType, wainola, haltia, villaParatiisi, ilmanTiloja } = data;
     if (data.meetingType && locationType === 'villaParatiisi') {
       const object = getObjectInList('meetingOptions', data.meetingType);
-      visitString = `${object.fi} - ${object.duration}h ${object.price} € + alv`;
+      visitString = `${object.fi} - ${object.duration}h - ${object.price} € + alv`;
     } else if (data.visitType) {
       visitString = getObject(data.visitType).fi;
     }
@@ -317,11 +322,14 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
     visitDetails['Vierailun tyyppi'] = visitString || data.visitTypeString;
     visitDetails.Tilat = locationType && getObject(locationType).fi;
     if (locationType === 'wainola' && wainola) {
-      const { weekDays, weekend } = getObject('wainola');
-      visitDetails.Tilat += ` - ${wainola === 'weekDays' ? `su-to ${weekDays}` : `pe-la ${weekend}`} € + alv`;
+      const dayType = wainola.includes(WainolaKeys[0].key) ? WainolaKeys[0] : WainolaKeys[1];
+      const wainolaObj = getObject('wainola')[dayType.key].find((o) => o.key === wainola);
+      visitDetails.Tilat += ` - ${dayType.name}: ${wainolaObj.text} - ${wainolaObj.duration}h - ${wainolaObj[priceField]} € ${
+        isCompany ? ' + alv' : ''
+      }`;
     } else if (locationType === 'haltia' && haltia) {
       const haltiaObj = getObjectInList('haltia', haltia);
-      visitDetails.Tilat += ` - ${haltiaObj.fi} ${haltiaObj.duration}h ${haltiaObj.price} € + alv`;
+      visitDetails.Tilat += ` - ${haltiaObj.fi} - ${haltiaObj.duration}h - ${haltiaObj.price} € + alv`;
     } else if (locationType === 'ilmanTiloja' && ilmanTiloja) {
       visitDetails.Tilat += ` - ${getObject('ilmanTiloja').price} € + alv`;
     } else if (villaParatiisi) {
@@ -360,7 +368,7 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
       const strDates = dateToStr(formData.from, formData.to);
       const title = `Tarjouspyyntö ${strDates}`;
       const description = `Tarjouspyyntö ajalle ${strDates} henkilöltä ${formData.name} `;
-      const html = createHTML(createDataFields(), title, description, formData.moreInformation);
+      const html = createHTML(createDataFields(), description, formData.moreInformation);
       const componentAsHtml = ReactDOMServer.renderToString(html);
       sendMail(formData.email, title, componentAsHtml);
     }
@@ -386,7 +394,7 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
               { text: 'Yritysasiakas', type: 'company' },
               { text: 'Yksityisasiakas', type: 'private' },
             ].map((customer) => (
-              <Grid.Column>
+              <Grid.Column key={customer.type}>
                 <Button size="massive" active={formData.type === customer.type} onClick={() => setType(customer.type)}>
                   {customer.text}
                 </Button>
