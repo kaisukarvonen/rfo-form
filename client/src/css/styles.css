@@ -80,7 +80,7 @@ body {
 .ui.grid.extra-persons > .row {
   align-items: center;
   margin-bottom: 3px;
-  min-width: 240px;
+  min-width: 100%;
 }
 
 .ui.grid.extra-persons > .row > .column .field {
@@ -172,7 +172,7 @@ p {
 }
 
 .ui.grid.extra-persons.private-acommodation > .row > .column {
-  max-width: 390px;
+  max-width: 60%;
 }
 .private-acommodation .pricing-header {
   color: #666;

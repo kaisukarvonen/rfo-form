@@ -1,11 +1,13 @@
-import React from 'react';
-import { Message, Form, Grid, Input, Label, Header } from 'semantic-ui-react';
 import 'moment/locale/fi';
-import moment from 'moment';
+import React from 'react';
+import { Form, Grid, Input, Label, Message } from 'semantic-ui-react';
+import { villaAcommodationTypes } from './Form';
 
 const padded = {
   marginBottom: 8,
 };
+
+const showPrice = false;
 
 const PrivateAccommodation = ({
   privatePersonAcommodationPrice,
@@ -15,15 +17,17 @@ const PrivateAccommodation = ({
   handleOnChange,
   getObjectInList,
   activePeriod,
+  showWeekendPrices,
 }) => {
+  const { onlyWeekend, alsoWeekend } = showWeekendPrices();
   const extraPersons = getObjectInList('extraPersons', 'cottage')[activePeriod];
-  const facilitiesStr = '2 huonetta (2+4 henkilöä)';
+  const facilitiesStr = '2 huonetta (2+4 hlöä)';
   const facilities = { summer: facilitiesStr, winter: facilitiesStr };
   const acommodationPrices = getObject('acommodationPrices');
   const { cottagesAmount } = formData;
   const cottageInfo = () => {
     const choices = extraPersons.choices;
-    return `${choices.length} huonetta (${choices.join(' + ')} henkilöä)`;
+    return `${choices.length} huonetta, yht. 9 hlöä (${choices.join('+')} hlöä)`;
   };
 
   const handleOnCottageAmountChange = (e, minus) => {
@@ -37,6 +41,18 @@ const PrivateAccommodation = ({
     }
     handleOnChange(e, { id: 'cottagesAmount', value: cAmount });
   };
+
+  const PriceRow = (label, days, id, price, extraInfo, perNight) => (
+    <Grid.Row>
+      <Grid.Column width={13}>
+        <Form.Checkbox label={`${days}: ${label}`} id={id} checked={formData[id]} onChange={handleOnChange} />
+        <i>{extraInfo}</i>
+      </Grid.Column>
+      <Grid.Column width={2}>
+        {price} € {perNight && ' / vrk'}
+      </Grid.Column>
+    </Grid.Row>
+  );
 
   const {
     villaPrice,
@@ -73,43 +89,59 @@ const PrivateAccommodation = ({
       )}
       {formData.locationType === 'villaParatiisi' && formData.from && (
         <Grid className="extra-persons private-acommodation">
-          <Grid.Row>
-            <Grid.Column width={14}>
-              <Form.Checkbox
-                label={facilities[activePeriod]}
-                id="villaParatiisi"
-                checked={formData.villaParatiisi}
-                onChange={handleOnChange}
-              />
-            </Grid.Column>
-            <Grid.Column width={2}>{acommodationPrices[activePeriod]['1']} €</Grid.Column>
-          </Grid.Row>
-          <Grid.Row>
-            <Grid.Column width={14} style={{ maxWidth: '390px' }}>
-              <b>Lisähuoneet pihamökeissä</b>
-              <br />
-              {cottageInfo()}
-              <div className="cottage-selector">
-                <Input
-                  labelPosition="right"
-                  max={extraPersons.choices.length}
-                  value={`${cottagesAmount} huonetta`}
-                  placeholder="0 huonetta"
-                  readOnly
-                >
-                  <Label as="a" onClick={(e) => handleOnCottageAmountChange(e, true)}>
-                    -
-                  </Label>
-                  <input />
-                  <Label as="a" onClick={(e) => handleOnCottageAmountChange(e, false)}>
-                    +
-                  </Label>
-                </Input>
-              </div>
-            </Grid.Column>
-            <Grid.Column width={2}>{extraPersons['1']} € / huone</Grid.Column>
-          </Grid.Row>
-          {formData.villaParatiisi && (
+          {((onlyWeekend && numOfNights === 1) || alsoWeekend) &&
+            PriceRow(
+              facilitiesStr,
+              villaAcommodationTypes.villaParatiisiWeekend,
+              'villaParatiisiWeekend',
+              acommodationPrices.weekend['1'],
+              `Sisältäen lisähuoneet pihamökeissä: ${cottageInfo()}`
+            )}
+          {((onlyWeekend && numOfNights > 1) || alsoWeekend) &&
+            PriceRow(
+              facilitiesStr,
+              villaAcommodationTypes.villaParatiisiFullWeekend,
+              'villaParatiisiFullWeekend',
+              acommodationPrices.weekend['2'],
+              `Sisältäen lisähuoneet pihamökeissä: ${cottageInfo()}`
+            )}
+          {!onlyWeekend &&
+            PriceRow(
+              facilities[activePeriod],
+              villaAcommodationTypes.villaParatiisi,
+              'villaParatiisi',
+              acommodationPrices[activePeriod]['1'],
+              false,
+              true
+            )}
+          {!onlyWeekend && (
+            <Grid.Row>
+              <Grid.Column width={14} style={{ maxWidth: '390px' }}>
+                <b>Lisähuoneet pihamökeissä</b>
+                <br />
+                {cottageInfo()}
+                <div className="cottage-selector">
+                  <Input
+                    labelPosition="right"
+                    max={extraPersons.choices.length}
+                    value={`${cottagesAmount} huonetta`}
+                    placeholder="0 huonetta"
+                    readOnly
+                  >
+                    <Label as="a" onClick={(e) => handleOnCottageAmountChange(e, true)}>
+                      -
+                    </Label>
+                    <input />
+                    <Label as="a" onClick={(e) => handleOnCottageAmountChange(e, false)}>
+                      +
+                    </Label>
+                  </Input>
+                </div>
+              </Grid.Column>
+              <Grid.Column width={2}>{extraPersons['1']} € / huone</Grid.Column>
+            </Grid.Row>
+          )}
+          {formData.villaParatiisi && showPrice && (
             <>
               <Grid.Row>
                 <Grid.Column width={14}>

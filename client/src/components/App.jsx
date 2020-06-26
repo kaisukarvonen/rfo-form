@@ -6,7 +6,7 @@ import * as fieldActions from '../dux/fields';
 import * as mailActions from '../dux/mail';
 import * as notificationActions from '../dux/notification';
 import '../css/styles.css';
-import '../css/DayPicker.css';
+import '../css/DayPicker.scss';
 import ErrorBoundary from './ErrorBoundary';
 import Notification from './Notification';
 import Form from './Form';
@@ -30,6 +30,16 @@ const App = ({ hideNotification, notification, fetchFields, fields, sendingEmail
   }, []);
 
   const showCalendarOnly = () => window.location.href.includes('calendar');
+  const customerType = () => {
+    const url = window.location.href;
+    let type = undefined;
+    if (url.includes('company')) {
+      type = 'company';
+    } else if (url.includes('private')) {
+      type = 'private';
+    }
+    return type;
+  };
 
   return (
     <ErrorBoundary>
@@ -49,6 +59,7 @@ const App = ({ hideNotification, notification, fetchFields, fields, sendingEmail
             />
           ) : (
             <Form
+              customerType={customerType()}
               fields={fields}
               disabledDays={disabled}
               availableFrom16={availableFrom16}

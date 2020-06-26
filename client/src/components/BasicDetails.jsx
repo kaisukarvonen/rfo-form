@@ -25,6 +25,7 @@ const BasicDetails = ({
   notVilla,
   numOfNights,
   privatePersonAcommodationPrice,
+  showWeekendPrices
 }) => {
   const timeOptions = () => {
     const options = new Array(17).fill(null).map((val, i) => {
@@ -164,6 +165,7 @@ const BasicDetails = ({
           </SemanticForm.Group>
           {isPrivate && formData.locationType === 'villaParatiisi' && (
             <PrivateAccommodation
+              showWeekendPrices={showWeekendPrices}
               numOfNights={numOfNights}
               privatePersonAcommodationPrice={privatePersonAcommodationPrice}
               formData={formData}

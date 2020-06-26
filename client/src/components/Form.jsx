@@ -13,8 +13,13 @@ export const WainolaKeys = [
   { name: 'Lauantai', key: 'weekend' },
 ];
 
+export const villaAcommodationTypes = {
+  villaParatiisiFullWeekend: 'Pe-su (2 vrk)',
+  villaParatiisiWeekend: 'Pe-la / la-su (1 vrk)',
+  villaParatiisi: 'Su-pe',
+};
+
 const initialForm = {
-  type: undefined,
   from: undefined,
   to: undefined,
   personAmount: 1,
@@ -24,12 +29,14 @@ const initialForm = {
   cottages: [],
   activities: [],
   cottagesAmount: 0,
+  locationType: undefined,
 };
 
 const showPrice = false;
+const showAcommodationPrice = false;
 
-const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil12 }) => {
-  const [formData, setFormData] = useState(initialForm);
+const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil12, customerType }) => {
+  const [formData, setFormData] = useState({ ...initialForm, type: customerType });
   const [errors, setErrors] = useState({});
   const [popupOpen, setPopup] = useState(false);
   const [activePeriod, setActivePeriod] = useState(undefined);
@@ -132,6 +139,24 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
   };
 
   const numOfNights = formData.from && formData.to ? moment(formData.to).diff(moment(formData.from), 'days') : 1;
+
+  const showWeekendPrices = () => {
+    let onlyWeekend = false;
+    let alsoWeekend = false;
+    const start = Number(moment(formData.from).format('d'));
+    const end = formData.to ? Number(moment(formData.to).format('d')) : start;
+    // reservation starts on friday or saturday
+    if (numOfNights === 1 && [5, 6].includes(start)) {
+      onlyWeekend = true;
+      // reservation is over weekend from friday to sunday
+    } else if (numOfNights === 2 && start === 5 && end === 0) {
+      onlyWeekend = true;
+    } else if (numOfNights >= 2) {
+      const endDay = start + numOfNights;
+      alsoWeekend = endDay >= 6;
+    }
+    return { onlyWeekend, alsoWeekend };
+  };
 
   const privatePersonAcommodationPrice = () => {
     if (formData.villaParatiisi) {
@@ -238,21 +263,11 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
   };
 
   const dateToStr = (from, to) => {
-    if (from && to) {
-      const diff = moment(to).diff(moment(from), 'days');
-      if (formData.type !== 'company') {
-        return diff !== 0
-          ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}`
-          : `${moment(from).format('DD.MM.YYYY')} - ${moment(from).add(1, 'days').format('DD.MM.YYYY')}`;
-      }
-      return diff !== 0
+    if (from) {
+      const diff = to ? moment(to).diff(moment(from), 'days') : undefined;
+      return diff
         ? `${moment(from).format('DD.MM.YYYY')} - ${moment(to).format('DD.MM.YYYY')}`
         : moment(from).format('DD.MM.YYYY');
-    } else if (from && !to) {
-      if (formData.type !== 'company' && formData.locationType === 'villaParatiisi') {
-        return `${moment(from).format('DD.MM.YYYY')} - ${moment(from).add(1, 'days').format('DD.MM.YYYY')}`;
-      }
-      return moment(from).format('DD.MM.YYYY');
     }
     return '';
   };
@@ -311,7 +326,16 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
 
     const visitDetails = { title: 'Vierailun lisätiedot' };
     let visitString;
-    const { locationType, wainola, haltia, villaParatiisi, ilmanTiloja } = data;
+    const {
+      locationType,
+      wainola,
+      haltia,
+      cottagesAmount,
+      villaParatiisi,
+      villaParatiisiFullWeekend,
+      villaParatiisiWeekend,
+      ilmanTiloja,
+    } = data;
     if (data.meetingType && locationType === 'villaParatiisi') {
       const object = getObjectInList('meetingOptions', data.meetingType);
       visitString = `${object.fi} - ${object.duration}h - ${object.price} € + alv`;
@@ -332,27 +356,37 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
       visitDetails.Tilat += ` - ${haltiaObj.fi} - ${haltiaObj.duration}h - ${haltiaObj.price} € + alv`;
     } else if (locationType === 'ilmanTiloja' && ilmanTiloja) {
       visitDetails.Tilat += ` - ${getObject('ilmanTiloja').price} € + alv`;
-    } else if (villaParatiisi) {
-      const {
-        villaPrice,
-        cottagesPrices,
-        acTitle,
-        villaFirstNight,
-        villaNextNights,
-        cottageFirstNight,
-        cottageNextNights,
-      } = privatePersonAcommodationPrice();
+    } else if (villaParatiisi || villaParatiisiWeekend || villaParatiisiFullWeekend) {
+      if (showAcommodationPrice) {
+        const {
+          villaPrice,
+          cottagesPrices,
+          acTitle,
+          villaFirstNight,
+          villaNextNights,
+          cottageFirstNight,
+          cottageNextNights,
+        } = privatePersonAcommodationPrice();
 
-      visitDetails[`${acTitle} ${villaPrice + cottagesPrices} € `] = [
-        <i>Huvila</i>,
-        villaFirstNight,
-        villaNextNights,
-        cottageFirstNight && <i>Lisähuoneet</i>,
-        cottageFirstNight,
-        cottageNextNights,
-      ];
+        visitDetails[`${acTitle} ${villaPrice + cottagesPrices} € `] = [
+          <i>Huvila</i>,
+          villaFirstNight,
+          villaNextNights,
+          cottageFirstNight && <i>Lisähuoneet</i>,
+          cottageFirstNight,
+          cottageNextNights,
+        ];
+      } else {
+        visitDetails[`Majoitus ${numOfNights} vuorokautta`] = [
+          villaParatiisi && villaAcommodationTypes.villaParatiisi,
+          villaParatiisiWeekend && villaAcommodationTypes.villaParatiisiWeekend,
+          villaParatiisiFullWeekend && villaAcommodationTypes.villaParatiisiFullWeekend,
+          cottagesAmount ? `${cottagesAmount} lisähuonetta` : undefined,
+        ];
+      }
     }
     visitDetails['Yrityksen nimi'] = data.companyName;
+
     return {
       basicInfo,
       food,
@@ -405,6 +439,7 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
           {formData.type && (
             <>
               <BasicDetails
+                showWeekendPrices={showWeekendPrices}
                 numOfNights={numOfNights}
                 privatePersonAcommodationPrice={privatePersonAcommodationPrice}
                 notVilla={notVilla}

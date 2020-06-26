@@ -11,17 +11,15 @@ const DatePicker = ({
   availableFrom16,
   availableUntil12,
   to,
-  until12Info,
-  from16Info,
   compact,
   className,
   calendarOnly,
   loading,
-  alwaysAvailable
+  alwaysAvailable,
 }) => {
   const modifiers = {
     start: from,
-    end: to
+    end: to,
   };
   const pastDays = { before: new Date() };
 
@@ -43,12 +41,12 @@ const DatePicker = ({
             'syys / september',
             'loka / october',
             'marras / november',
-            'joulu / december'
+            'joulu / december',
           ]
         }
         numberOfMonths={compact ? 1 : 2}
         fromMonth={new Date()}
-        className="Selectable"
+        className={`Selectable ${calendarOnly ? 'calendar-only' : ''}`}
         onDayClick={handleDayClick}
         modifiers={!alwaysAvailable ? { ...modifiers, availableFrom16, availableUntil12 } : modifiers}
         selectedDays={[from, { from, to }]}
@@ -56,12 +54,10 @@ const DatePicker = ({
       />
       {!alwaysAvailable && (
         <div style={{ margin: '0 0 0 20px' }}>
-          {until12Info && <p>Vapaa klo 12 asti {calendarOnly && `/ Available until 12 o'clock`}</p>}
-          {from16Info && <p>Vapaa klo 16 alkaen {calendarOnly && `/ Available from 16 o'clock`}</p>}
           <Label
             style={{
               backgroundColor: '#c2e2b3',
-              margin: '0 8px 0 0'
+              margin: '0 8px 0 0',
             }}
             size="large"
             circular
@@ -72,7 +68,7 @@ const DatePicker = ({
             <Label
               style={{
                 backgroundColor: '#ffc107',
-                margin: compact ? '0 8px 0 0' : '0 8px'
+                margin: compact ? '0 8px 0 0' : '0 8px',
               }}
               size="large"
               circular
