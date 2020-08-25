@@ -94,6 +94,7 @@
 
 .DayPicker {
   display: inline-block;
+  font-family: 'Spartan', sans-serif !important;
 }
 
 .DayPicker-wrapper {
@@ -168,7 +169,7 @@
 }
 
 .DayPicker-Caption > div {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 500;
 }
 
@@ -208,6 +209,7 @@
   text-align: center;
   cursor: pointer;
   vertical-align: middle;
+  font-size: 12px;
 }
 
 .DayPicker-Day:not(.DayPicker-Day--outside):not(.DayPicker-Day--disabled) {

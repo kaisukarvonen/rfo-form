@@ -1,6 +1,49 @@
 body {
   font-size: 13px !important;
+  font-family: 'Spartan', sans-serif;
 }
+
+button {
+  font-family: 'Josefin Sans', sans-serif !important;
+}
+
+.ui.form, .ui.header, .ui.input>input, .ui.form textarea, .ui.message {
+  line-height: 1.46 !important;
+  font-family: 'Spartan', sans-serif !important;
+}
+
+.ui.button, .ui.basic.button {
+  border-radius: 0;
+  border: 1px solid #315322;
+  background-color: #fff;
+  color: #000;
+  transition: all .3s;
+}
+
+.ui.input>input, .ui.form input, .ui.form textarea {
+  border-radius: 0 !important;
+}
+
+.ui.basic.button {
+  color: #555 !important;
+}
+
+
+.ui.button.active, .ui.basic.active.button, .ui.button:hover, .ui.basic.button:hover, .ui.button.primary {
+  background-color: #315322 !important;
+  color: #fff !important;
+}
+
+.ui.button.primary:hover {
+  background-color: #000 !important;
+  transform: scale(1.1);
+  border: 1px solid #000;
+}
+
+.ui.small.button {
+  font-size: 14.5px;
+}
+
 .flex-column {
   display: flex;
   flex-direction: column;
@@ -113,6 +156,10 @@ body {
 
 .ui.grid > .column {
   padding: 0 !important;
+}
+
+h3.ui.header {
+  font-size: 15.7px !important;
 }
 
 h4.ui.header {

@@ -415,12 +415,6 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
 
   return (
     <div className="main">
-      <div className="site-header">
-        <h3 className="header-title">Tarjouspyyntö - Nuuksion Taika</h3>
-        <p>
-          <a href="https://www.nuuksiontaika.fi/">Takaisin Nuuksion Taian sivuille</a>
-        </p>
-      </div>
       <Container style={{ margin: '40px 0', flexGrow: 1 }}>
         <SemanticForm style={{ margin: '0 5%' }} noValidate="novalidate">
           <Grid columns={4} centered stackable doubling>
@@ -429,7 +423,7 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
               { text: 'Yksityisasiakas', type: 'private' },
             ].map((customer) => (
               <Grid.Column key={customer.type}>
-                <Button size="massive" active={formData.type === customer.type} onClick={() => setType(customer.type)}>
+                <Button size="huge" active={formData.type === customer.type} onClick={() => setType(customer.type)}>
                   {customer.text}
                 </Button>
               </Grid.Column>
@@ -505,14 +499,6 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
           )}
         </SemanticForm>
       </Container>
-      <div className="site-header footer">
-        <h3 className="header-title">Nuuksion Taika</h3>
-        <p>
-          050 5050869
-          <br />
-          <a href="mailto:info@nuuksiontaika.fi">info@nuuksiontaika.fi</a>
-        </p>
-      </div>
     </div>
   );
 };
