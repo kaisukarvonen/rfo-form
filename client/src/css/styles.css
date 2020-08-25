@@ -7,20 +7,32 @@ button {
   font-family: 'Josefin Sans', sans-serif !important;
 }
 
-.ui.form, .ui.header, .ui.input>input, .ui.form textarea, .ui.message {
+#dates {
+  padding: 4px 0 0 5px !important;
+  font-size: 13.7px !important;
+}
+
+.ui.form,
+.ui.header,
+.ui.input > input,
+.ui.form textarea,
+.ui.message {
   line-height: 1.46 !important;
   font-family: 'Spartan', sans-serif !important;
 }
 
-.ui.button, .ui.basic.button {
+.ui.button,
+.ui.basic.button {
   border-radius: 0;
   border: 1px solid #315322;
   background-color: #fff;
   color: #000;
-  transition: all .3s;
+  transition: all 0.3s;
 }
 
-.ui.input>input, .ui.form input, .ui.form textarea {
+.ui.input > input,
+.ui.form input,
+.ui.form textarea {
   border-radius: 0 !important;
 }
 
@@ -28,8 +40,11 @@ button {
   color: #555 !important;
 }
 
-
-.ui.button.active, .ui.basic.active.button, .ui.button:hover, .ui.basic.button:hover, .ui.button.primary {
+.ui.button.active,
+.ui.basic.active.button,
+.ui.button:hover,
+.ui.basic.button:hover,
+.ui.button.primary {
   background-color: #315322 !important;
   color: #fff !important;
 }
