@@ -17,7 +17,7 @@
     "cors": "^2.8.4",
     "debug": "~2.6.9",
     "express": "~4.15.5",
-    "mongodb": "^2.2.33",
+    "mongodb": "^3.6.1",
     "mongoose": "^5.8.9",
     "nodemailer": "^4.6.5",
     "nodemon": "^1.12.1"
