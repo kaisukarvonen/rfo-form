@@ -276,6 +276,7 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
     const data = formData;
     const basicInfo = {
       title: getObject('contactDetails').fi,
+      Asiakastyyppi: getObject(data.type).fi,
       [getObject('name').fi]: data.name,
       [getObject('email').fi]: data.email,
       [getObject('phone').fi]: <a href={`tel:${data.phone}`}>{data.phone}</a>,
@@ -284,7 +285,6 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
       [getObject('arrivalTime').fi]: `klo ${data.arrivalTime}`,
       [getObject('departTime').fi]: `klo ${data.departTime}`,
       [getObject('personAmount').fi]: data.personAmount,
-      Asiakastyyppi: getObject(data.type).fi,
     };
     if (showPrice) {
       basicInfo.Hinta = `${calculatePrice()} €`;
@@ -348,9 +348,7 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
     if (locationType === 'wainola' && wainola) {
       const dayType = wainola.includes(WainolaKeys[0].key) ? WainolaKeys[0] : WainolaKeys[1];
       const wainolaObj = getObject('wainola')[dayType.key].find((o) => o.key === wainola);
-      visitDetails.Tilat += ` - ${dayType.name}: ${wainolaObj.text} - ${wainolaObj.duration}h - ${wainolaObj[priceField]} € ${
-        isCompany ? ' + alv' : ''
-      }`;
+      visitDetails.Tilat += ` - ${dayType.name}: ${wainolaObj.text} - ${wainolaObj.duration}h`;
     } else if (locationType === 'haltia' && haltia) {
       const haltiaObj = getObjectInList('haltia', haltia);
       visitDetails.Tilat += ` - ${haltiaObj.fi} - ${haltiaObj.duration}h - ${haltiaObj.price} € + alv`;
