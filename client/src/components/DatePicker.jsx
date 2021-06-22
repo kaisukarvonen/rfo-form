@@ -1,7 +1,7 @@
 import React from 'react';
 import MomentLocaleUtils from 'react-day-picker/moment';
 import DayPicker from 'react-day-picker';
-import { Label } from 'semantic-ui-react';
+import { Label, Button } from 'semantic-ui-react';
 import 'moment/locale/fi';
 
 const DatePicker = ({
@@ -77,6 +77,19 @@ const DatePicker = ({
             Osittain vapaa {calendarOnly && `/ Partly available`}
           </div>
         </div>
+      )}
+      {calendarOnly && (
+        <>
+          <Button
+            style={{ margin: 20 }}
+            compact
+            size="small"
+            basic
+            onClick={() => (window.parent.location.href = 'https://www.nuuksiontaika.fi/tarjouspyynto/')}
+          >
+            Pyydä tarjous
+          </Button>
+        </>
       )}
     </div>
   );
