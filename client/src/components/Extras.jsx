@@ -116,7 +116,7 @@ const Extras = ({ values, getObject, showInfo, handleOnChange }) => {
                     <Grid.Column width={9} style={{ maxWidth: '250px' }}>
                       <Form.Checkbox label={i.fi} id={i.key} checked={values[i.key]} onChange={handleOnChange} />
                     </Grid.Column>
-                    <Grid.Column width={7}>{displayExtraServicePrice(i, i.priceInfoFi)}</Grid.Column>
+                    {/* <Grid.Column width={7}>{displayExtraServicePrice(i, i.priceInfoFi)}</Grid.Column> */}
                   </Grid.Row>
                 ))}
               </Grid>
@@ -147,11 +147,11 @@ const Extras = ({ values, getObject, showInfo, handleOnChange }) => {
                   )}
                 </Grid.Column>
                 <Grid.Column width={7}>
-                  {displayExtraServicePrice(getObject('linen'))}
+                  {/* {displayExtraServicePrice(getObject('linen'))}
                   {displayExtraServicePrice(getObject('towels'))}
                   {displayExtraServicePrice(getObject('hottub'))}
                   {displayExtraServicePrice(getObject('petFee'))}
-                  {values.type === 'private' && displayCleaningPrice(getObject('cleaning'))}
+                  {values.type === 'private' && displayCleaningPrice(getObject('cleaning'))} */}
                 </Grid.Column>
               </Grid>
             </Accordion.Content>

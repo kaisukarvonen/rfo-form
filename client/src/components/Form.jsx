@@ -304,8 +304,9 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
         .options.filter((eq) => data[eq.key])
         .map((eq) => {
           const field = getObjectInList('rentalEquipment', eq.key);
-          const price = field[priceField] || field.alvPrice;
-          return `${field.fi} ${price ? `(${price} €)` : ''}`;
+          // const price = field[priceField] || field.alvPrice;
+          // return `${field.fi} ${price ? `(${price} €)` : ''}`;
+          return field.fi;
         }),
     };
 
@@ -314,8 +315,9 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
       .filter((service) => data[service])
       .map((s) => {
         const field = getObject(s);
-        const price = field[priceField] || field.alvPrice;
-        return `${field.fi} ${price ? `( ${price} € )` : ''}`;
+        // const price = field[priceField] || field.alvPrice;
+        // return `${field.fi} ${price ? `( ${price} € )` : ''}`;
+        return field.fi;
       });
     const allServices = selectedServices.concat(
       getObject('meetingEquipment')
@@ -338,7 +340,8 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
     } = data;
     if (data.meetingType && locationType === 'villaParatiisi') {
       const object = getObjectInList('meetingOptions', data.meetingType);
-      visitString = `${object.fi} - ${object.duration}h - ${object.price} € + alv`;
+      // visitString = `${object.fi} - ${object.duration}h - ${object.price} € + alv`;
+      visitString = `${object.fi} - ${object.duration}h`;
     } else if (data.visitType) {
       visitString = getObject(data.visitType).fi;
     }
@@ -351,20 +354,14 @@ const Form = ({ fields, sendMail, disabledDays, availableFrom16, availableUntil1
       visitDetails.Tilat += ` - ${dayType.name}: ${wainolaObj.text} - ${wainolaObj.duration}h`;
     } else if (locationType === 'haltia' && haltia) {
       const haltiaObj = getObjectInList('haltia', haltia);
-      visitDetails.Tilat += ` - ${haltiaObj.fi} - ${haltiaObj.duration}h - ${haltiaObj.price} € + alv`;
-    } else if (locationType === 'ilmanTiloja' && ilmanTiloja) {
-      visitDetails.Tilat += ` - ${getObject('ilmanTiloja').price} € + alv`;
+      // visitDetails.Tilat += ` - ${haltiaObj.fi} - ${haltiaObj.duration}h - ${haltiaObj.price} € + alv`;
+      visitDetails.Tilat += ` - ${haltiaObj.fi} - ${haltiaObj.duration}h`;
+      // } else if (locationType === 'ilmanTiloja' && ilmanTiloja) {
+      //   visitDetails.Tilat += ` - ${getObject('ilmanTiloja').price} € + alv`;
     } else if (villaParatiisi || villaParatiisiWeekend || villaParatiisiFullWeekend) {
       if (showAcommodationPrice) {
-        const {
-          villaPrice,
-          cottagesPrices,
-          acTitle,
-          villaFirstNight,
-          villaNextNights,
-          cottageFirstNight,
-          cottageNextNights,
-        } = privatePersonAcommodationPrice();
+        const { villaPrice, cottagesPrices, acTitle, villaFirstNight, villaNextNights, cottageFirstNight, cottageNextNights } =
+          privatePersonAcommodationPrice();
 
         visitDetails[`${acTitle} ${villaPrice + cottagesPrices} € `] = [
           <i>Huvila</i>,

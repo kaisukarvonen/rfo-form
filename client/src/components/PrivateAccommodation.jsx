@@ -48,25 +48,16 @@ const PrivateAccommodation = ({
         <Form.Checkbox label={`${days}: ${label}`} id={id} checked={formData[id]} onChange={handleOnChange} />
         <i>{extraInfo}</i>
       </Grid.Column>
-      <Grid.Column width={2}>
-        {price} € {perNight && ' / vrk'}
-      </Grid.Column>
+      <Grid.Column width={2}>{/* {price} € {perNight && ' / vrk'} */}</Grid.Column>
     </Grid.Row>
   );
 
-  const {
-    villaPrice,
-    cottagesPrices,
-    acTitle,
-    villaFirstNight,
-    villaNextNights,
-    cottageFirstNight,
-    cottageNextNights,
-  } = privatePersonAcommodationPrice();
+  const { villaPrice, cottagesPrices, acTitle, villaFirstNight, villaNextNights, cottageFirstNight, cottageNextNights } =
+    privatePersonAcommodationPrice();
 
   return (
     <>
-      {acommodationPrices.showInfo && (
+      {/* {acommodationPrices.showInfo && (
         <Message>
           <Message.Header>Kesäkausi (touko-lokakuu)</Message.Header>
           <Message.Content style={padded}>
@@ -86,7 +77,7 @@ const PrivateAccommodation = ({
           </Message.Content>
           Joulu ja Uusivuosi kesähinnoittelun mukaan. Hinta sisältää klo 16-12 välisen oleskelun.
         </Message>
-      )}
+      )} */}
       {formData.locationType === 'villaParatiisi' && formData.from && (
         <Grid className="extra-persons private-acommodation">
           {((onlyWeekend && numOfNights === 1) || alsoWeekend) &&
@@ -105,6 +96,7 @@ const PrivateAccommodation = ({
               acommodationPrices.weekend['2'],
               `Sisältäen lisähuoneet pihamökeissä: ${cottageInfo()}`
             )}
+          <Grid.Row style={{ marginTop: 20 }}></Grid.Row>
           {!onlyWeekend &&
             PriceRow(
               facilities[activePeriod],
@@ -138,7 +130,7 @@ const PrivateAccommodation = ({
                   </Input>
                 </div>
               </Grid.Column>
-              <Grid.Column width={2}>{extraPersons['1']} € / huone</Grid.Column>
+              {/* <Grid.Column width={2}>{extraPersons['1']} € / huone</Grid.Column> */}
             </Grid.Row>
           )}
           {formData.villaParatiisi && showPrice && (
@@ -147,7 +139,7 @@ const PrivateAccommodation = ({
                 <Grid.Column width={14}>
                   <b>{acTitle}</b>
                 </Grid.Column>
-                <Grid.Column width={2}>{villaPrice + cottagesPrices} €</Grid.Column>
+                {/* <Grid.Column width={2}>{villaPrice + cottagesPrices} €</Grid.Column> */}
               </Grid.Row>
               {numOfNights > 1 || cottagesAmount ? (
                 <>

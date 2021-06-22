@@ -24,9 +24,7 @@ const CompanyForm = ({ getObject, values, showInfo, handleOnRadioChange, handleO
             <Grid.Column width={2}>
               <p>{m.duration} h</p>
             </Grid.Column>
-            <Grid.Column width={4}>
-              <p>{m.price} € + alv</p>
-            </Grid.Column>
+            <Grid.Column width={4}>{/* <p>{m.price} € + alv</p> */}</Grid.Column>
           </Grid.Row>
         ))}
       </Grid>
@@ -98,9 +96,7 @@ const CompanyForm = ({ getObject, values, showInfo, handleOnRadioChange, handleO
                     />
                   </Form.Field>
                 </Grid.Column>
-                <Grid.Column width={5}>
-                  <p>{ilmanTiloja.price} € + alv</p>
-                </Grid.Column>
+                <Grid.Column width={5}>{/* <p>{ilmanTiloja.price} € + alv</p> */}</Grid.Column>
               </Grid.Row>
             </Grid>
           )}

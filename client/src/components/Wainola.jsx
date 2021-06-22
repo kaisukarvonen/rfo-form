@@ -35,7 +35,7 @@ const Wainola = ({ values, handleOnChange, getObject, isCompany, handleOnRadioCh
                 </Grid.Column>
                 <Grid.Column width={3}>{option.duration} h</Grid.Column>
 
-                <Grid.Column width={4}>{isCompany ? `${option.price} € + alv` : `${option.alvPrice} €`}</Grid.Column>
+                {/* <Grid.Column width={4}>{isCompany ? `${option.price} € + alv` : `${option.alvPrice} €`}</Grid.Column> */}
               </Grid.Row>
             ))}
           </React.Fragment>

@@ -135,6 +135,18 @@ button {
   padding: 0.2em !important;
 }
 
+.ui.grid.extra-persons {
+  width: 100%;
+}
+
+.cottage-selector {
+  font-size: 13px;
+}
+
+#personAmount {
+  font-size: 13px;
+}
+
 .ui.grid.extra-persons > .row {
   align-items: center;
   margin-bottom: 3px;

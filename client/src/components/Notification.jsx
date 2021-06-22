@@ -4,7 +4,7 @@ import { Modal, Icon, Transition } from 'semantic-ui-react';
 const Notification = ({ hideNotification, notification }) => {
   const [visible, setVisibility] = useState(true);
 
-  const successMsg = 'Kiitos yhteydenotostasi, otamme teihin yhteyttä mahdollisimman pian.';
+  const successMsg = 'Kiitokset yhteydenotostasi, pyrimme vastaamaan sinulle vuorokauden sisällä maanantaista perjantaihin.';
   const errorMsg = 'Viestiäsi ei valitettavasti voitu lähettää, yritä myöhemmin uudelleen';
   return (
     <Transition visible={visible} unmountOnHide transitionOnMount onHide={hideNotification}>

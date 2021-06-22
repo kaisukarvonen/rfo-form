@@ -49,6 +49,21 @@ const PrivatePersonForm = ({ values, getObject, handleOnChange, handleOnRadioCha
           handleOnRadioChange={handleOnRadioChange}
           values={values}
         />
+        {values.locationType === 'villaParatiisi' && (
+          <>
+            <br />
+            <Button
+              compact
+              size="small"
+              basic
+              onClick={() =>
+                (window.location.href = 'https://nuuksiontaika.johku.com/fi_FI/vuokraa-mokki-sauna-nuotiopaikka/mokki-nuuksio')
+              }
+            >
+              Osta majoitus verkkokaupasta
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );
