@@ -79,17 +79,31 @@ const DatePicker = ({
         </div>
       )}
       {calendarOnly && (
-        <>
-          <Button
-            style={{ margin: 20 }}
-            compact
-            size="small"
-            basic
-            onClick={() => (window.parent.location.href = 'https://www.nuuksiontaika.fi/tarjouspyynto/')}
-          >
-            Pyydä tarjous
-          </Button>
-        </>
+        <div style={{ margin: 20 }}>
+          <div>
+            <Button
+              compact
+              size="small"
+              basic
+              onClick={() => (window.parent.location.href = 'https://www.nuuksiontaika.fi/tarjouspyynto/')}
+            >
+              Pyydä tarjous
+            </Button>
+          </div>
+          <div>
+            <Button
+              style={{ marginTop: 6 }}
+              compact
+              size="small"
+              basic
+              onClick={() =>
+                (window.location.href = 'https://nuuksiontaika.johku.com/fi_FI/vuokraa-mokki-sauna-nuotiopaikka/mokki-nuuksio')
+              }
+            >
+              Osta majoitus verkkokaupasta
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );
