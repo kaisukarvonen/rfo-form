@@ -1,12 +1,18 @@
 import * as axios from 'axios';
 import { baseUrl } from '../../config';
 
-function sendMail(action) {
-  const promise = axios
+const sendMail = (action) => {
+  return axios
     .post(`${baseUrl}/mail`, { email: action.email, title: action.title, html: action.html })
-    .then(response => response)
-    .catch(error => error);
-  return promise;
+    .then((response) => response)
+    .catch((error) => error);
+};
+
+function sendMailCopyToCustomer(action) {
+  return axios
+    .post(`${baseUrl}/mail/copy`, { email: action.email, title: 'Kopio lähettämästäsi tarjouspyynnöstä', html: action.html })
+    .then((response) => response)
+    .catch((error) => error);
 }
 
-export default sendMail;
+export { sendMail, sendMailCopyToCustomer };

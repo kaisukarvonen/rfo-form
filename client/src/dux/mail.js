@@ -1,5 +1,5 @@
 import { takeLatest, call, put } from 'redux-saga/effects';
-import send from './api/mail';
+import { sendMail as send, sendMailCopyToCustomer } from './api/mail';
 import { showNotification } from './notification';
 
 const SEND_MAIL = 'SEND_MAIL';
@@ -26,6 +26,7 @@ function* sendMailWorker(action) {
     const response = yield call(send, action);
     yield put(sendedMail());
     if (response.status === 200 && !response.data.responseCode) {
+      yield call(sendMailCopyToCustomer, action);
       yield put(showNotification({ success: true }));
     } else {
       yield put(showNotification({ success: false }));
